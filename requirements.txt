@@ -1,0 +1,8 @@
+flask 
+flask_login # 用于用户登录
+flask_sqlalchemy# 用于操作mysql
+flask_mail# 用于发送邮件
+flask_redis# 用于操作redis
+flask_cors# 用于处理跨域问题
+flask_restx# 用于创建接口
+datetime# 用于获取当前时间

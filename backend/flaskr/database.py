@@ -31,7 +31,8 @@ class Drop(Resource):
         try:
             db.drop_all()
             if redis_client.exists('goods_num') : redis_client.delete('goods_num')
-            if redis_client.exists('User') : redis_client.delete('goods_num')   
+            if redis_client.exists('goods_name') : redis_client.delete('goods_name')   
+
             return {'message': '删库成功'}, 200
         except:
             return {'message': '删库成功'}, 200

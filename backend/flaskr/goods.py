@@ -17,6 +17,7 @@ add_model = api.model('addmodel', {
 change_model = api.model('changemodel',{
     'good_id': fields.Integer(required=True, description='商品id'),
     'change_num': fields.Integer(required=True, description='商品售出/进货数量'),
+    'type': fields.Integer(required=True, description='商品售出/进货类型')
 })
 
 @api.route('/add')
@@ -35,29 +36,23 @@ class add(Resource):
         good_baseline = api.payload['good_baseline']
         return  good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline)
 
-@api.route('/Replenish')
+@api.route('/change')
 class Replenish(Resource):
-    @api.doc(description='商品补货')
+    @api.doc(description='商品数量改变')
     @api.expect(change_model, validate=True)
     def post(self):
         """
-        商品数量增加
+        视type类型决定加减
         """
+        print(api.payload)
         id = api.payload['good_id']
         nums = api.payload['change_num']
-        return good_Replenish(id,nums)
-
-@api.route('/sell')
-class sell(Resource):
-    @api.doc(description='商品卖出')
-    @api.expect(change_model, validate=True)
-    def post(self):
-        """
-        商品数量减少
-        """
-        id = api.payload['good_id']
-        nums = api.payload['change_num']
+        type= api.payload['type']
+        if type :
+            return good_Replenish(id,nums)
         return good_sell(id,nums)
+
+
 
 @api.route('/show')
 class show(Resource):

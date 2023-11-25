@@ -1,6 +1,7 @@
 from function.sql import upload_data,get_value, get_values
 from flaskr.extensions import redis_client
 from flask import jsonify
+import datetime  
 import json
 def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
     '''
@@ -45,17 +46,20 @@ def good_sell(good_id,nums):
         good_id : 商品id\n
         nums : 卖出的商品数量\n
     output:\n
-        None : 直接对数据库进行操作\n
+        msg : 信息\n
     '''
+    nums_now = int(redis_client.hget('goods_num', good_id))
+    if nums > nums_now:
+        return  jsonify(f"购买数量超过库存总量:{nums_now}，购买失效")
     redis_client.hincrby('goods_num', good_id, -nums)
     nums_now = int(redis_client.hget('goods_num', good_id))
     good_name = redis_client.hget('goods_name', good_id).decode('utf-8')
     msg = []
     if good_nums_verify(good_id,nums_now):
         msg.append(f"{good_id}号商品{good_name},商品数量过低")
-
     msg.append(f"{good_id}号商品{good_name},成功售出{nums}件物品，现库存量为{nums_now}")
-    return msg
+    upload_data({"time_stamp":datetime.datetime.now(),"good_id":good_id,"good_num":nums},"sales_records")
+    return jsonify(msg)
 
 def good_nums_verify(good_id,nums):
     '''
@@ -68,9 +72,7 @@ def good_nums_verify(good_id,nums):
             True : 提示管理员需要进行补货\n
             False : 不进行操作\n
     '''
-    
     data = get_value(good_id,"good_id","goods")
-
     if data.good_baseline > 2 * nums :
         return  True 
     return False 
