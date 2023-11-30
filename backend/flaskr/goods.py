@@ -42,7 +42,7 @@ class Replenish(Resource):
     @api.expect(change_model, validate=True)
     def post(self):
         """
-        视type类型决定加减
+        视type类型决定加减,0为售出,非0为进货
         """
         print(api.payload)
         id = api.payload['good_id']
@@ -51,7 +51,15 @@ class Replenish(Resource):
         if type :
             return good_Replenish(id,nums)
         return good_sell(id,nums)
-
+    
+@api.route('/low')
+class low(Resource):
+    @api.doc(description='显示数量过低的商品')
+    def post(self):
+        """
+        显示所有数量小于标准持有量的商品
+        """
+        return good_nums_verify()
 
 
 @api.route('/show')

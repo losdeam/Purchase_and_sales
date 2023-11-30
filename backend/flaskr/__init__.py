@@ -4,7 +4,7 @@ from flask_cors import CORS
 # RESTful API
 from flask_restx import Api
 # 导入需要初始化的组件
-from .extensions import db , mail, login_manager,redis_client
+from .extensions import db , redis_client
 
 def create_app():
     # 创造并配置app, instance_relative_config=True表示配置文件是相对于instance folder的相对路径
@@ -22,15 +22,12 @@ def create_app():
 
     # 初始化各种组件
     db.init_app(app)
-    mail.init_app(app)
-    login_manager.init_app(app)
     redis_client.init_app(app)
     # 导入并注册命名空间
-    from . import auth,goods
+    from . import goods
     from . import database
     
     api.add_namespace(database.api)
-    api.add_namespace(auth.api)
     api.add_namespace(goods.api)
 
     return app

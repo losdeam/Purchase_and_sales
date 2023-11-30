@@ -1,22 +1,15 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Login from "../views/Login.vue";
 import Page from "../views/Page.vue";
-import Page2 from "../views/Page2.vue";
-import User from "../views/User.vue";
 import Commodity from "../views/Commodity.vue";
+import stock_goods from "../views/stock_goods.vue";
 import Header from "../components/Header.vue";
 Vue.use(VueRouter);
  
 const routes = [
   {
     path: "/",
-    redirect: "/Login",
-  },
-  {
-    path: "/Login",
-    name: "Login",
-    component: Login,
+    redirect: "/Page",
   },
   {
     path: "/page",
@@ -28,36 +21,17 @@ const routes = [
     children: [
       {
         path: "/page",
-        redirect: "/page/user",
-      },
-      {
-        path: "/page/user",
-        name: "User",
-        component: User,
+        redirect: "/page/commodity",
       },
       {
         path: "/page/commodity",
         name: "Commodity",
         component: Commodity,
       },
-    ],
-  },
-  {
-    path: "/page2",
-    name: "Page2",
-    components: {
-      default: Page2,
-      Header,
-    },
-    children: [
       {
-        path: "/page2",
-        redirect: "/page2/commodity",
-      },
-      {
-        path: "/page2/commodity",
-        name: "Commodity2",
-        component: Commodity,
+        path: "/page/stock",
+        name: "stock_goods",
+        component: stock_goods,
       },
     ],
   },

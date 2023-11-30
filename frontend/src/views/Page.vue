@@ -4,12 +4,12 @@
         <el-col :span="3">
           <el-menu default-active="1" class="el-menu-vertical-demo">
             <el-menu-item index="1" @click="btn1">
-              <i class="el-icon-menu"></i>
-              <span slot="title">用户管理</span>
-            </el-menu-item>
-            <el-menu-item index="2" @click="btn2">
               <i class="el-icon-setting"></i>
               <span slot="title">商品管理</span>
+            </el-menu-item>
+            <el-menu-item index="2" @click="btn2">
+              <i class="el-icon-menu"></i>
+              <span slot="title">进货管理</span>
             </el-menu-item>
           </el-menu>
         </el-col>
@@ -35,20 +35,23 @@
     },
     methods: {
       btn1() {
-        this.$router.push("./user");
-      },
-      btn2() {
         this.$router.push("./commodity");
       },
-      // handleOpen(key, keyPath) {
-      //   console.log(key, keyPath);
-      // },
-      // handleClose(key, keyPath) {
-      //   console.log(key, keyPath);
-      // },
+      btn2() {
+        this.$router.push("./stock");
+      },
+      handleOpen(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose(key, keyPath) {
+        console.log(key, keyPath);
+      },
     },
   };
   </script>
    
   <style scoped>
+  /* .el-main {
+    padding: 0;
+  } */
   </style>

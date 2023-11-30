@@ -6,8 +6,8 @@
       v-loading="loading"
       element-loading-text="拼命加载中"
     >
-      <el-table-column prop="id" label="编号" width="180"> </el-table-column>
-      <el-table-column prop="name" label="商品名称" width="180"></el-table-column>
+      <el-table-column prop="id" label="编号" > </el-table-column>
+      <el-table-column prop="name" label="商品名称" ></el-table-column>
       <el-table-column prop="price_buying" label="进货价"> </el-table-column>
       <el-table-column prop="price_retail" label="零售价"> </el-table-column>
       

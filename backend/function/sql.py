@@ -1,8 +1,7 @@
 from flaskr.extensions import db
-from flaskr.models import User, Goods,Sales_records
+from flaskr.models import Goods,Sales_records
 
 dict_sheet = {
-    "User":User,
     "goods":Goods,
     "sales_records":Sales_records
 }
