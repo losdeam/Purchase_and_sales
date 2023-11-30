@@ -2,7 +2,9 @@ from function.sql import upload_data,get_value, get_values
 from flaskr.extensions import redis_client
 from flask import jsonify
 import datetime  
-import json
+
+first_flag = True 
+good_data = {}
 def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
     '''
     将good_id的商品的数量添加nums\n
@@ -81,12 +83,31 @@ def good_show():
     '''
     展示所有商品及其库存
     '''
+    global first_flag 
+    global good_data
     data_result = {}
     data_result["message"] = []
     goods_id_list = redis_client.hkeys('goods_name')
     for good_id in goods_id_list:
-        good_name = redis_client.hget('goods_name', good_id).decode('utf-8')
-        good_num = int(redis_client.hget('goods_num', good_id))
         good_id = int(good_id)
-        data_result["message"].append({"good_id":good_id,"good_name":good_name,"good_num":good_num})
+        if first_flag: # 第一次从数据库中读取，以获取变化频率较小的字段。
+            data = get_value(good_id,"good_id","goods")
+            good_data[good_id]= {
+                "good_name" : data.good_name,
+                "good_num"  : data.good_num,
+                "good_price_buying" : data.good_price_buying,
+                "good_price_retail" : data.good_price_retail,
+                "good_sort" : data.good_sort ,
+                "good_baseline" : data.good_baseline
+            }
+        good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取
+        data_result["message"].append({"good_id":int(good_id),\
+                                       "good_name":good_data[good_id]["good_name"], \
+                                       "good_price_buying":good_data[good_id]["good_price_buying"], \
+                                       "good_num":good_num, \
+                                       "good_price_retail" : good_data[good_id]["good_price_retail"], \
+                                        "good_sort" : good_data[good_id]["good_sort"] , \
+                                        "good_baseline" : good_data[good_id]["good_baseline"]\
+                                       })
+    first_flag = False  #使用一个global的变量来实现同一个用户只执行一次的操作
     return jsonify(data_result)
