@@ -16,5 +16,5 @@ class Goods(db.Model): # 商品模型
 class Sales_records(db.Model):
     __tablename__ = 'sales_records' 
     time_stamp = db.Column(db.DateTime, primary_key=True, index=True)
-    good_id = db.Column(db.Integer,db.ForeignKey('goods.good_id'),nullable=False)
+    good_id = db.Column(db.Integer,nullable=False)
     good_num = db.Column(db.Integer)

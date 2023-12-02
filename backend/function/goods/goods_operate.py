@@ -41,6 +41,8 @@ def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,g
     output:\n
         None : 直接对数据库进行操作\n
     '''
+    data_result = {}
+    data_result["message"] = ""
     if not get_values(good_name,"good_name","goods"):
         upload_data({"good_name":good_name,"good_num":good_num,"good_price_buying":good_price_buying,"good_price_retail":good_price_retail,"good_sort":good_sort,"good_baseline":good_baseline},"goods")
         data = get_value(good_name,"good_name","goods")
@@ -53,9 +55,11 @@ def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,g
                 "good_sort" : good_sort ,
                 "good_baseline" : good_baseline
             }
-        return jsonify(f"全新商品{good_name},编号为{data.good_id},数据添加成功,现库存量{good_num}")
+        data_result["message"] = f"全新商品{good_name},编号为{data.good_id},数据添加成功,现库存量{good_num}"
+        return jsonify(data_result)
     data = get_value(good_name,"good_name","goods")
-    data = jsonify(f"已存在同名商品{good_name},编号为{data.good_id}，商品添加失败") 
+    data_result["message"] = f"已存在同名商品{good_name},编号为{data.good_id}，商品添加失败"
+    data = jsonify(data_result) 
     data.status_code = 401
     return data
 def good_Replenish(good_id,nums):
@@ -161,10 +165,14 @@ def show_sale_record(n=3):
     data_result["message"] = []
     data_init()
     datas = get_values_time(datetime.datetime.now()- datetime.timedelta(days=n),"time_stamp","sales_records")
-    for data in datas:
-        data_result["message"].append({"time_stamp":data[0].time_stamp.strftime("%Y-%m-%d %H:%M:%S"),\
-                                       "good_id":data[0].good_id, \
-                                       "good_name": good_data[data[0].good_id]["good_name"],\
-                                       "good_num":data[0].good_num, \
-                                       })
-    return jsonify(data_result)
+    if datas:
+        for data in datas:
+            data_result["message"].append({"time_stamp":data[0].time_stamp.strftime("%Y-%m-%d %H:%M:%S"),\
+                                        "good_id":data[0].good_id, \
+                                        "good_name": good_data[data[0].good_id]["good_name"],\
+                                        "good_num":data[0].good_num, \
+                                        })
+
+    result = jsonify(data_result)
+
+    return result

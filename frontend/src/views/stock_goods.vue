@@ -34,7 +34,6 @@
       </div>
     </el-dialog>
     <el-dialog title="操作成功"
-      
       :visible.sync="stock_success"
       width="30%"
     >
@@ -104,7 +103,6 @@
 
 <script>
 export default {
-
   data() {
     return {
       formattedData :[],
@@ -157,7 +155,15 @@ export default {
           "Content-Type": "application/json",
         },
       })
-        .then((response) => response.json())
+        .then((response) =>{
+          // 检查响应状态码
+          if (!response.ok) {
+            throw new Error("响应状态码不合理");
+          }
+
+          return response.json();
+        }
+        )
         .then((data) => {
         
           const rawData = JSON.stringify( data["message"]);
@@ -170,9 +176,12 @@ export default {
             baseline: item.good_baseline,
             number: item.good_num
           };
-
         });
         })
+        .catch((error) => {
+      console.error(error.message);
+      // 处理错误，可以根据实际情况进行处理
+    });
 
     },
     performTransaction() {
@@ -184,7 +193,16 @@ export default {
         },
         body: JSON.stringify(this.transaction),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          // 检查响应状态码
+          if (!response.ok) {
+            this.stock_fail = true;
+          }
+          else{
+            this.stock_success = true;
+          }
+          return response.json();
+        })
         .then((data) => {
           this.dynamicText = data;
           // 执行交易后刷新商品数据
@@ -204,7 +222,6 @@ export default {
       })
         .then((response) => {
           // 检查响应状态码
-          console.log(response.status)
           if (!response.ok) {
             this.stock_fail = true;
           }
@@ -214,14 +231,7 @@ export default {
           return response.json();
         })
         .then((data) => {
-
-          this.dynamicText = data;
-          this.new_goods.name = ""
-          this.new_goods.num = 0
-          this.new_goods.price_buying = 0
-          this.new_goods.price_retail = 0
-          this.new_goods.sort = ""
-          this.new_goods.baseline_name = 0
+          this.dynamicText =  data["message"];
           // 执行交易后刷新商品数据  
         })
         .catch((error) => {
@@ -248,7 +258,7 @@ export default {
           return response.json();
         })
         .then((data) => {
-          this.dynamicText = data;
+          this.dynamicText = data["message"];
         })
         .catch((error) => {
           console.error("Error performing transaction:", error);
@@ -285,13 +295,15 @@ export default {
       
       
     },
-
     self_add_good(){
       this.self_stock = true;
     },
     new_good(){
       this.self_stock = false;
       this.add_new_good = true;
+
+    },
+    exist_good(){
 
     },
     self_add_new_good(){
