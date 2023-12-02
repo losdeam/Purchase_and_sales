@@ -20,8 +20,6 @@ def upload_data(data, sheet):
     db.session.commit()
 
     pass
-
-
 def get_value(data, key, sheet):
     '''
     根据所给的data值在sheet的key字段中寻找一条记录
@@ -35,8 +33,6 @@ def get_value(data, key, sheet):
     result = db.session.execute(stmt).scalar_one_or_none()
 
     return result
-
-
 def get_values(data, key, sheet):
     '''
     根据所给的data值在sheet的key字段中寻找所有符合的记录
@@ -53,3 +49,30 @@ def get_values(data, key, sheet):
         return result
     else:
         return None
+def get_values_time(data, key, sheet):
+    '''
+    根据所给的data值在sheet的key字段中寻找所有符合的记录
+    return : 字典格式的记录,不存在则返回None
+    '''
+    if sheet in dict_sheet:
+        stmt = db.select(dict_sheet[sheet]).where(getattr(dict_sheet[sheet], key) >= data)
+    else:
+        raise AttributeError("sheet name error")
+
+    result = db.session.execute(stmt).all()
+
+    if result:
+        return result
+    else:
+        return None
+def delete_value(data, key, sheet):
+    '''
+    从sheet表中找到与key字段中与data相匹配的记录，并删除
+    return : boolean
+    '''
+    record = get_value(data, key, sheet)
+    if record:
+        db.session.delete(record)
+        db.session.commit()
+        return True 
+    return False 

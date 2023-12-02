@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Page from "../views/Page.vue";
 import Commodity from "../views/Commodity.vue";
+import sales_record  from "../views/sales_record.vue";
 import stock_goods from "../views/stock_goods.vue";
 import Header from "../components/Header.vue";
 Vue.use(VueRouter);
@@ -32,6 +33,11 @@ const routes = [
         path: "/page/stock",
         name: "stock_goods",
         component: stock_goods,
+      },
+      {
+        path: "/page/sales_record",
+        name: "sales_record",
+        component: sales_record,
       },
     ],
   },

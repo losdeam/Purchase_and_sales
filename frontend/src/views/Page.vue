@@ -11,6 +11,10 @@
               <i class="el-icon-menu"></i>
               <span slot="title">进货管理</span>
             </el-menu-item>
+            <el-menu-item index="3" @click="btn3">
+              <i class="el-icon-menu"></i>
+              <span slot="title">销售记录</span>
+            </el-menu-item>
           </el-menu>
         </el-col>
         <el-main>
@@ -39,6 +43,9 @@
       },
       btn2() {
         this.$router.push("./stock");
+      },
+      btn3() {
+        this.$router.push("./sales_record");
       },
       handleOpen(key, keyPath) {
         console.log(key, keyPath);

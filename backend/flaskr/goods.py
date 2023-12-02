@@ -1,10 +1,9 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
 from flaskr.extensions import db ,redis_client      # 导入数据库
-from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show
+from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete
 import flaskr.models  # 务必导入模型
 import datetime 
 api = Namespace('goods', description='商品操作接口')
-
 add_model = api.model('addmodel', {
     'good_name': fields.String(max_length=100, required=True, description='商品名称'),
     'good_num': fields.Integer(required=True, description='商品库存数量'),
@@ -19,7 +18,9 @@ change_model = api.model('changemodel',{
     'change_num': fields.Integer(required=True, description='商品售出/进货数量'),
     'type': fields.Integer(required=True, description='商品售出/进货类型')
 })
-
+delete_model = api.model('deletemodel',{
+    'good_id': fields.Integer(required=True, description='商品id'),
+})
 @api.route('/add')
 class add(Resource):
     @api.doc(description='全新商品购入')
@@ -34,6 +35,7 @@ class add(Resource):
         good_price_retail = api.payload['good_price_retail']
         good_sort = api.payload['good_sort']
         good_baseline = api.payload['good_baseline']
+        
         return  good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline)
 
 @api.route('/change')
@@ -44,7 +46,6 @@ class Replenish(Resource):
         """
         视type类型决定加减,0为售出,非0为进货
         """
-        print(api.payload)
         id = api.payload['good_id']
         nums = api.payload['change_num']
         type= api.payload['type']
@@ -69,3 +70,23 @@ class show(Resource):
         '''
         '''
         return good_show()
+
+@api.route('/record')
+class sale_record(Resource):
+    @api.doc(description='展示销售记录')
+    def post(self):
+        '''
+        '''
+        return show_sale_record()
+    
+
+@api.route('/delete')
+class sale_record(Resource):
+    @api.doc(description='删除对应id商品')
+    @api.expect(delete_model, validate=True)
+    def post(self):
+        '''
+        商品删除
+        '''
+        id = api.payload['good_id']
+        return good_delete(id)
