@@ -24,13 +24,26 @@
     <el-dialog title="请填写进货数量"
       :visible.sync="dialogVisible"
       width="30%"
-
     >
       <!-- 弹窗内容 -->
       <div>
         <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
         <el-input v-model="inputValue" placeholder="输入内容"></el-input>
         <el-button @click="onDialogConfirm">确定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog title="自主进货"
+      :visible.sync="self_change_good"
+      width="30%"
+    >
+      <!-- 弹窗内容 -->
+      <div>
+        <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
+        <el-input v-model="inputValue" placeholder="输入内容">
+        <template slot="prepend">商品id：</template></el-input>
+        <el-input v-model="str_good_num" placeholder="输入内容">
+        <template slot="prepend">商品数量：</template></el-input>
+        <el-button @click="self_get_good">确定</el-button>
       </div>
     </el-dialog>
     <el-dialog title="操作成功"
@@ -112,7 +125,7 @@ export default {
       stock_fail: false,
       self_stock : false,
       add_new_good : false,
-
+      self_change_good : false ,
       transaction:{
         good_id : 1 , 
         change_num : 0 ,
@@ -129,14 +142,24 @@ export default {
         good_id : 0,
       },
       new_goods:{
-        good_name : '""',
+        good_name : '',
         good_num : 0,
         good_price_buying : 0,
         good_price_retail : 0,
         good_sort : '',
         good_baseline : 0,
       },
-
+      new_good_data:{
+        good_id: 0 ,
+        new_data:{
+          good_name : '',
+          good_num : 0,
+          good_price_buying : 0,
+          good_price_retail : 0,
+          good_sort : '',
+          good_baseline : 0,
+        },
+      },
 
       inputValue :'',
       dynamicText : ''
@@ -205,6 +228,7 @@ export default {
         })
         .then((data) => {
           this.dynamicText = data;
+          this.fetchProducts();
           // 执行交易后刷新商品数据
           
         })
@@ -259,6 +283,7 @@ export default {
         })
         .then((data) => {
           this.dynamicText = data["message"];
+          this.fetchProducts()
         })
         .catch((error) => {
           console.error("Error performing transaction:", error);
@@ -278,7 +303,7 @@ export default {
     delete_confirm_button(){
       this.delete_confirm = false
       this.delete_good_post()
-      this.fetchProducts()
+      
       
     },
     handleDialogClose() {
@@ -304,7 +329,16 @@ export default {
 
     },
     exist_good(){
-
+      this.self_stock = false
+      this.self_change_good = true 
+      this.transaction.type = 1;
+    },
+    self_get_good(){
+      this.transaction.good_id = parseInt(this.inputValue, 10);
+      this.transaction.change_num = parseInt(this.inputValue, 10);
+      this.self_change_good = false;
+      this.performTransaction();
+      
     },
     self_add_new_good(){
       this.new_goods.good_name = this.str_good_name
@@ -312,7 +346,7 @@ export default {
       this.new_goods.good_price_buying = parseFloat(this.str_good_price_buying)
       this.new_goods.good_price_retail = parseFloat(this.str_good_price_retail)
       this.new_goods.good_sort = this.str_good_sort
-      this.new_goods.good_baseline_name = parseInt(this.str_good_baseline_name, 10);
+      this.new_goods.good_baseline = parseInt(this.str_good_baseline_name, 10);
       this.add_new_good_post()
       this.add_new_good = false;
     },

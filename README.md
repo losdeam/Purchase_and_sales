@@ -1,6 +1,3 @@
-![image.png](https://cdn.nlark.com/yuque/0/2023/png/40362764/1701505578708-0054f3ab-72e7-47c3-90e5-4b7f4d48f6fd.png#averageHue=%239c9c9c&clientId=ube801ec9-1f7d-4&from=paste&height=421&id=u1606d32c&originHeight=474&originWidth=1904&originalType=binary&ratio=0.9375&rotation=0&showTitle=false&size=65946&status=done&style=none&taskId=u004ea2e8-f77f-4d4a-be6a-b563876c7c2&title=&width=1692.4444444444443)
-预期使用前后端分离的方式完成构建，以便于后续的模块化调用以及优化
-
 # 运行方法：
 ### 后端
 

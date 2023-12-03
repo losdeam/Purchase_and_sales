@@ -65,6 +65,21 @@ def get_values_time(data, key, sheet):
         return result
     else:
         return None
+def update_data(data, key, sheet,new_data):
+    data_result = []
+    stmt = db.select(dict_sheet[sheet]).where(getattr(dict_sheet[sheet], key) == data)
+    result = db.session.execute(stmt).scalar_one_or_none()
+    if result != None:
+        for key, value in new_data.items():
+            if value:
+                try :
+                    setattr(result, key, value)
+                    data_result.append(f"修改成功,已成功将{sheet}表中的{key}字段修改为{value}")
+                except:
+                    data_result.append(f"修改失败,修改{sheet}表中的{key}字段修改为{value}时出现问题")
+        # 提交更改
+        db.session.commit()
+    return data_result
 def delete_value(data, key, sheet):
     '''
     从sheet表中找到与key字段中与data相匹配的记录，并删除

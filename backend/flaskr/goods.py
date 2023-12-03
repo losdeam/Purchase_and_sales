@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
 from flaskr.extensions import db ,redis_client      # 导入数据库
-from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete
+from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete,good_conifg
 import flaskr.models  # 务必导入模型
 import datetime 
 api = Namespace('goods', description='商品操作接口')
@@ -90,3 +90,15 @@ class sale_record(Resource):
         '''
         id = api.payload['good_id']
         return good_delete(id)
+    
+@api.route('/update')
+class update(Resource):
+    @api.doc(description='商品数据更改')
+    def post(self):
+        '''
+        '''
+        good_id = api.payload['good_id']
+
+        new_data = api.payload['new_data']
+        
+        return  good_conifg(good_id ,new_data)

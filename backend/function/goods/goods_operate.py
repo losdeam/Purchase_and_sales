@@ -1,4 +1,4 @@
-from function.sql import upload_data,get_value, get_values,get_values_time,delete_value
+from function.sql import upload_data,get_value, get_values,get_values_time,delete_value,update_data
 from flaskr.extensions import redis_client
 from flaskr.models import Goods
 from flask import jsonify
@@ -155,6 +155,15 @@ def good_delete(good_id):
     redis_client.hdel('goods_num', good_id)
     result["message"] = f"商品{good_name},已成功删除"
     return jsonify(result) 
+def good_conifg(good_id,new_data):
+    data_result = {}
+    data_init()
+    data_result["message"] = update_data(good_id,"good_id","goods",new_data)
+    for key,value in new_data.items():
+        if value :
+            good_data[good_id][key] = value
+    result = jsonify(data_result)
+    return result
 def show_sale_record(n=3):
     '''
     展示销售记录
@@ -169,7 +178,7 @@ def show_sale_record(n=3):
         for data in datas:
             data_result["message"].append({"time_stamp":data[0].time_stamp.strftime("%Y-%m-%d %H:%M:%S"),\
                                         "good_id":data[0].good_id, \
-                                        "good_name": good_data[data[0].good_id]["good_name"],\
+                                        "good_name": good_data[data[0].good_id]["good_name"] if data[0].good_id in good_data else "商品已下架",\
                                         "good_num":data[0].good_num, \
                                         })
 
