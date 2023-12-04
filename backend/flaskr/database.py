@@ -15,6 +15,7 @@ class Create(Resource):
         '''
         try:
             db.create_all()
+            
             return {'message': '创建成功'}, 200
         except:
             return {'message': '创建失败'}, 500

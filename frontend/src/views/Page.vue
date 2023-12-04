@@ -15,6 +15,11 @@
               <i class="el-icon-menu"></i>
               <span slot="title">销售记录</span>
             </el-menu-item>
+            <el-menu-item index="4" @click="btn4">
+              <i class="el-icon-setting"></i>
+              <span slot="title">用户管理</span>
+
+            </el-menu-item>
           </el-menu>
         </el-col>
         <el-main>
@@ -46,6 +51,9 @@
       },
       btn3() {
         this.$router.push("./sales_record");
+      },
+      btn4() {
+        this.$router.push("./User");
       },
       handleOpen(key, keyPath) {
         console.log(key, keyPath);

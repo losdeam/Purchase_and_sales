@@ -3,7 +3,7 @@
     border
     style="width: 100%"
     :data="formattedData"
-    v-loading="loading"
+
   >
     <el-table-column prop="time_stamp" label="时间" > </el-table-column>
     <el-table-column prop="good_id" label="编号" ></el-table-column>

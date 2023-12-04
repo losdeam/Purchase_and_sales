@@ -5,12 +5,19 @@ import Commodity from "../views/Commodity.vue";
 import sales_record  from "../views/sales_record.vue";
 import stock_goods from "../views/stock_goods.vue";
 import Header from "../components/Header.vue";
+import Login from "../views/Login.vue";
+import User from "../views/User.vue";
 Vue.use(VueRouter);
  
 const routes = [
   {
     path: "/",
-    redirect: "/Page",
+    redirect: "/Login",
+  },
+  {
+    path: "/Login",
+    name: "Login",
+    component: Login,
   },
   {
     path: "/page",
@@ -38,6 +45,11 @@ const routes = [
         path: "/page/sales_record",
         name: "sales_record",
         component: sales_record,
+      },
+      {
+        path: "/page/user",
+        name: "User",
+        component: User,
       },
     ],
   },
