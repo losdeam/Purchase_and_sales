@@ -1,9 +1,11 @@
 from flaskr.extensions import db
-from flaskr.models import Goods,Sales_records
+from flaskr.models import Goods,Sales_records,User,Warehouse
 
 dict_sheet = {
     "goods":Goods,
-    "sales_records":Sales_records
+    "sales_records":Sales_records,
+    "user" : User,
+    "warehouse":Warehouse
 }
 def upload_data(data, sheet):
     '''

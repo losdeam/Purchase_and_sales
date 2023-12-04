@@ -5,12 +5,14 @@ import flaskr.models  # 务必导入模型
 import datetime 
 api = Namespace('goods', description='商品操作接口')
 add_model = api.model('addmodel', {
+    'Warehouse_id':fields.Integer(required=True, description='所存储的仓库的编号'),
     'good_name': fields.String(max_length=100, required=True, description='商品名称'),
     'good_num': fields.Integer(required=True, description='商品库存数量'),
     'good_price_buying': fields.Float(required=True, description='商品进货价格'),
     'good_price_retail': fields.Float(required=True, description='商品零售价格'),
     'good_sort': fields.String(max_length=100, required=True, description='商品分类'),
     'good_baseline': fields.Integer(required=True, description='商品最低库存量'),
+    'good_note' : fields.String(max_length=200, required=True, description='商品备注'),
 })
 
 change_model = api.model('changemodel',{
@@ -29,14 +31,16 @@ class add(Resource):
         '''
         全新商品购入
         '''
+        Warehouse_id = api.payload['Warehouse_id']
         good_name = api.payload['good_name']
         good_num = api.payload['good_num']
         good_price_buying = api.payload['good_price_buying']
         good_price_retail = api.payload['good_price_retail']
         good_sort = api.payload['good_sort']
         good_baseline = api.payload['good_baseline']
+        good_note = api.payload['good_note']
         
-        return  good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline)
+        return  good_add(Warehouse_id,good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline,good_note)
 
 @api.route('/change')
 class Replenish(Resource):
@@ -98,7 +102,5 @@ class update(Resource):
         '''
         '''
         good_id = api.payload['good_id']
-
         new_data = api.payload['new_data']
-        
         return  good_conifg(good_id ,new_data)

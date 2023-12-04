@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Page from "../views/Page.vue";
+import Login from "../views/Login.vue";
 import Commodity from "../views/Commodity.vue";
 import sales_record  from "../views/sales_record.vue";
 import stock_goods from "../views/stock_goods.vue";
@@ -10,7 +11,13 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    redirect: "/Page",
+    redirect: "/Login",
+    
+  },
+  {
+    path: "/Login",
+    name: "Login",
+    component: Login,
   },
   {
     path: "/page",

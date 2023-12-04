@@ -21,39 +21,45 @@ def data_init():
         for good in goods_list:
             good_id = good.good_id
             good_data[good_id]= {
+                "Warehouse_id" : good.Warehouse_id,
                 "good_name" : good.good_name,
                 "good_price_buying" : good.good_price_buying,
                 "good_price_retail" : good.good_price_retail,
                 "good_sort" : good.good_sort ,
-                "good_baseline" : good.good_baseline
+                "good_baseline" : good.good_baseline,
+                "good_note" : good.good_note
             }
         flag_init = False
-def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
+def good_add(Warehouse_id,good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline,good_note):
     '''
-    将good_id的商品的数量添加nums\n
+    添加全新商品\n
     input:\n
+        Warehouse_id : 仓库id\n
         good_name :商品id\n
         good_num : 收入仓库的商品数量\n
         good_price_buying : 商品的进货价\n
         good_price_retail : 商品的零售价\n
         good_sort : 商品的类别\n
         good_baseline : 商品的标准数量\n
+        good_note : 商品备注\n
     output:\n
         None : 直接对数据库进行操作\n
     '''
     data_result = {}
     data_result["message"] = ""
     if not get_values(good_name,"good_name","goods"):
-        upload_data({"good_name":good_name,"good_num":good_num,"good_price_buying":good_price_buying,"good_price_retail":good_price_retail,"good_sort":good_sort,"good_baseline":good_baseline},"goods")
+        upload_data({"Warehouse_id":Warehouse_id,"good_note":good_note,"good_name":good_name,"good_num":good_num,"good_price_buying":good_price_buying,"good_price_retail":good_price_retail,"good_sort":good_sort,"good_baseline":good_baseline},"goods")
         data = get_value(good_name,"good_name","goods")
         redis_client.hset("goods_num",data.good_id,good_num)
         redis_client.hset("goods_name",data.good_id,good_name)
         good_data[data.good_id]= {
+                "Warehouse_id" :Warehouse_id,
                 "good_name" : good_name,
                 "good_price_buying" : good_price_buying,
                 "good_price_retail" : good_price_retail,
                 "good_sort" : good_sort ,
-                "good_baseline" : good_baseline
+                "good_baseline" : good_baseline,
+                "good_note" : good_note
             }
         data_result["message"] = f"全新商品{good_name},编号为{data.good_id},数据添加成功,现库存量{good_num}"
         return jsonify(data_result)
