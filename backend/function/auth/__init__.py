@@ -1,2 +1,1 @@
-from .login import auth_login,auth_show
-from .register import auth_register
+from .auth_manage import auth_show,auth_login,auth_register,delete_auth

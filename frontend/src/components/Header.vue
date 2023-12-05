@@ -25,9 +25,22 @@ export default {
   },
   mounted() {
     this.name = window.sessionStorage.getItem("username");
-
   },
   methods: {
+    logout_t(){
+        // 使用后端提供的接口获取商品数据
+        fetch("http://127.0.0.1:50000/api/auth/logout", {
+                method: "post",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include", // 添加此行，确保携带 Cookie
+              })
+        .then((response) => response.json())
+        .then((data) => {
+        })
+
+    },
     logout() {
       this.$confirm("您确定要退出吗, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -35,7 +48,7 @@ export default {
         type: "warning",
       })
         .then(() => {
-          window.sessionStorage.clear();
+          this.logout_t()
           this.$message({
             message: "你已经退出登陆！请重新登录账号",
             type: "warning",

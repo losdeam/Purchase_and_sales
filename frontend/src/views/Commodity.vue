@@ -103,11 +103,17 @@ export default {
           good_baseline : 0,
         },
       },
+      intervalId: null, 
     };
   },
   mounted() {
     // 在组件加载时获取商品数据
-    this.fetchProducts();
+    
+    this.intervalId = setInterval(this.fetchProducts, 1000);
+  },
+  beforeDestroy() {
+    // Clear the interval when the component is about to be destroyed
+    clearInterval(this.intervalId);
   },
   methods: {
     fetchProducts() {

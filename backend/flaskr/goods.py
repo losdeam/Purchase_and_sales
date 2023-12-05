@@ -3,6 +3,7 @@ from flaskr.extensions import db ,redis_client      # 导入数据库
 from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete,good_conifg
 import flaskr.models  # 务必导入模型
 import datetime 
+
 api = Namespace('goods', description='商品操作接口')
 add_model = api.model('addmodel', {
     'good_name': fields.String(max_length=100, required=True, description='商品名称'),
@@ -68,6 +69,7 @@ class show(Resource):
     @api.doc(description='展示商品')
     def post(self):
         '''
+        显示商品列表
         '''
         return good_show()
 
@@ -76,6 +78,7 @@ class sale_record(Resource):
     @api.doc(description='展示销售记录')
     def post(self):
         '''
+        显示销售记录
         '''
         return show_sale_record()
     
@@ -96,9 +99,9 @@ class update(Resource):
     @api.doc(description='商品数据更改')
     def post(self):
         '''
+        对商品数据进行修改
         '''
         good_id = api.payload['good_id']
-
         new_data = api.payload['new_data']
-        
+    
         return  good_conifg(good_id ,new_data)

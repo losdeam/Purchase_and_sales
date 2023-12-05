@@ -21,9 +21,10 @@ def create_app():
     app.config.from_pyfile('config.py')
 
     # 初始化各种组件
+    login_manager.init_app(app)
     db.init_app(app)
     redis_client.init_app(app)
-    login_manager.init_app(app)
+    
     # 导入并注册命名空间
     from . import goods
     from . import database
