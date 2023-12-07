@@ -64,7 +64,6 @@ class Logout(Resource):
         '''
         登出接口
         '''
-        print(session)
         logout_user()
         return {'message': '登出成功'}, 200
 @api.route('/show')

@@ -85,7 +85,7 @@
         operation_success : false,
         operation_fail : false,
         add_new_auth : false ,
-        watch_good : false,
+        watch_good : true,
         change_good : false,
         add_new_good : false,
         add_new_user : false,
@@ -198,6 +198,10 @@
                 }
                 else{
                   this.add_new_auth = false
+                  this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
                   this.operation_success = true;
                   
                 }
@@ -216,12 +220,9 @@
           }).then(() => {
             this.user_data.user_id = row.user_id
             this.delete()
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
-
-          })
+          }).catch(() => {
+    // 用户点击取消按钮时执行的代码，可以不做任何操作或者进行相应处理
+  });
       },
       handleClick(tab, event) {
         console.log(tab, event);

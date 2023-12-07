@@ -1,9 +1,9 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
 from flaskr.extensions import db ,redis_client      # 导入数据库
+from flask_login import logout_user, login_required, current_user  # 用户认证
 from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete,good_conifg
 import flaskr.models  # 务必导入模型
 import datetime 
-
 api = Namespace('goods', description='商品操作接口')
 add_model = api.model('addmodel', {
     'good_name': fields.String(max_length=100, required=True, description='商品名称'),
@@ -30,14 +30,15 @@ class add(Resource):
         '''
         全新商品购入
         '''
-        good_name = api.payload['good_name']
-        good_num = api.payload['good_num']
-        good_price_buying = api.payload['good_price_buying']
-        good_price_retail = api.payload['good_price_retail']
-        good_sort = api.payload['good_sort']
-        good_baseline = api.payload['good_baseline']
-        
-        return  good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline)
+        if (current_user.power >>2) &1 :  # type: ignore
+            good_name = api.payload['good_name']
+            good_num = api.payload['good_num']
+            good_price_buying = api.payload['good_price_buying']
+            good_price_retail = api.payload['good_price_retail']
+            good_sort = api.payload['good_sort']
+            good_baseline = api.payload['good_baseline']
+            return  good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline)
+        return {'message': '当前用户不具有添加新商品的权限'}, 403     
 
 @api.route('/change')
 class Replenish(Resource):
@@ -91,8 +92,10 @@ class sale_record(Resource):
         '''
         商品删除
         '''
-        id = api.payload['good_id']
-        return good_delete(id)
+        if (current_user.power >>2) &1 :  # type: ignore
+            id = api.payload['good_id']
+            return good_delete(id)
+        return {'message': '当前用户不具有将商品下架的权限'}, 403     
     
 @api.route('/update')
 class update(Resource):
@@ -101,7 +104,9 @@ class update(Resource):
         '''
         对商品数据进行修改
         '''
-        good_id = api.payload['good_id']
-        new_data = api.payload['new_data']
-    
-        return  good_conifg(good_id ,new_data)
+        if (current_user.power >>1) &1 :  # type: ignore
+            good_id = api.payload['good_id']
+            new_data = api.payload['new_data']
+        
+            return  good_conifg(good_id ,new_data)
+        return {'message': '当前用户不具有修改商品信息的权限'}, 403     

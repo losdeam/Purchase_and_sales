@@ -65,11 +65,6 @@ def delete_auth(user_id):
     del user_data[user_id]
     result["message"] = f"用户{user_id},已成功删除"
     return jsonify(result) 
-
-
-
-
-
 def auth_register(data):
     '''通过输入的用户信息来进行用户登录\n
     input:\n

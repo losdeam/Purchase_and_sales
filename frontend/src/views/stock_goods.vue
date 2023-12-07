@@ -242,6 +242,7 @@ export default {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 添加此行，确保携带 Cookie
         body: JSON.stringify(this.new_goods),
       })
         .then((response) => {
@@ -268,6 +269,7 @@ export default {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 添加此行，确保携带 Cookie
         body: JSON.stringify(this.delete_good),
       })
         .then((response) => {

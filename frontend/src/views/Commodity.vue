@@ -156,6 +156,7 @@ export default {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 添加此行，确保携带 Cookie
         body: JSON.stringify(this.new_good_data),
       })
       .then((response) => {
@@ -190,8 +191,6 @@ export default {
       this.new_good_data.new_data.good_price_retail = parseFloat(this.str_good_price_retail)
       this.new_good_data.new_data.good_sort = this.str_good_sort
       this.new_good_data.new_data.good_baseline = parseInt(this.str_good_baseline, 10);
-      console.log(this.new_good_data)
-      console.log(this.str_good_baseline)
       this.update_good_data()
       
       this.update_good = false 
