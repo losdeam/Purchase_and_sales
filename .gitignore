@@ -1,4 +1,21 @@
 *.pyc
+*.cache
+
+
 backend/instance/
 
+
+
+backend/function/recognition/data/
+backend/function/recognition/detect/
+backend/function/recognition/model/
+backend/function/recognition/run/
+backend/function/recognition/train_fuction/detect/
+
 node_modules
+
+
+
+test.py
+
+test.py

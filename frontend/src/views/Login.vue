@@ -1,7 +1,7 @@
 <template>
     <div class="home">
       <div class="homebox" v-loading="loading">
-        <h3>KGC后台管理系统</h3>
+        <h3>进销货管理系统</h3>
         <el-input
           class="input"
           v-model="user_data.user_name"

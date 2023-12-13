@@ -51,7 +51,7 @@ class Login(Resource):
         登录接口
         '''
         if current_user.is_authenticated:  # type: ignore
-            return {'message': '用户已登录'}, 403
+            logout_user()
         args = api.payload
         data = auth_login(args)
 
