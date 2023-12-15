@@ -92,3 +92,17 @@ def delete_value(data, key, sheet):
         db.session.commit()
         return True 
     return False 
+def get_all(key,sheet):
+    '''
+    返回所有在sheet的key字段中的记录的对应值
+    return : 字典格式的记录,不存在则返回None
+    '''
+    if sheet in dict_sheet:
+        result = dict_sheet[sheet].query.all()
+    else:
+        raise AttributeError("sheet name error")
+
+    if result:
+        return [getattr(record, key) for record in result]
+    else:
+        return None

@@ -4,9 +4,11 @@ flask == 2.3.2
 Werkzeug == 2.3.8
 flask_login 
 flask_sqlalchemy
+Flask-PyMongo
 flask_mail
 flask_redis
 flask_cors
-
+ultralytics
+scikit-learn
 datetime
 ultralytics

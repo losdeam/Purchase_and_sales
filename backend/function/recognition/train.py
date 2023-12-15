@@ -1,15 +1,14 @@
 from ultralytics import YOLO
-from setting import setting
+from instance.yolo_config import path_config
 from  multiprocessing import freeze_support
 
-# 加载预训练的YOLOv8n模型
 
 
 # 将模型导出为ONNX格式
 # success = model.export(format='onnx')
 if __name__ == '__main__':
     freeze_support()
-    model = YOLO(setting['model_path'])
+    model = YOLO(path_config['model_path'])
     # 使用“coco128.yaml”数据集训练模型3个周期
     results = model.train(data='./data/goods.yaml', epochs=3,amp = False)
 
