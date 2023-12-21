@@ -1,6 +1,7 @@
 *.pyc
 *.cache
 *.jpg
+*.lock
 
 backend/instance/
 

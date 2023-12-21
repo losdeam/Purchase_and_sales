@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error
-from .convert import convert
 from instance.yolo_config import image_config
 img_part_size = image_config['img_part_size']
 num_clusters = image_config['num_clusters']
@@ -101,13 +100,17 @@ def find_goods(cluster_center_img_list):
                 good_center_img = index
         result.append(good_center_img)
     return result
-def resize_list(img_list):
+def resize_list(img_list_withpath):
+    result= []
     gray_result = []
-    for img in img_list:
+    path_result = []
+    for img,path in img_list_withpath:
         img = cv2.resize(img,(320,320))
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        result.append(img)
         gray_result.append(gray_img)
-    return gray_result
+        path_result.append(path)
+    return result,gray_result,path_result
 
 
 

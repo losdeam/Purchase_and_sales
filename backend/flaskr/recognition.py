@@ -1,7 +1,11 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
-from function.recognition import image_to_mongo,image_from_mongo,image_delete_mongo,tranform,img_clear
-
-
+# from function.recognition import image_to_mongo,data_from_mongo,image_delete_mongo,tranform,img_clear,image_read,image_from_video，
+from function.recognition import  * 
+from flaskr.extensions import socketio
+from instance.yolo_config import path_config
+import base64
+import cv2
+import json
 api = Namespace('recognition', description='识别接口')
 label_model = api.model('labelmodel', {
     'label_name': fields.String(max_length=100, required=True, description='标签名称'),
@@ -13,7 +17,7 @@ class add(Resource):
     @api.expect(label_model, validate=True)
     def post(self):
         """
-        显示所有数量小于标准持有量的商品
+        添加数据至mongo
         """
         name = api.payload['label_name']
         return image_to_mongo(name)
@@ -25,7 +29,7 @@ class get(Resource):
         """
         获取数据
         """
-        return image_from_mongo()
+        return data_from_mongo()
     
 @api.route('/delete')
 class delete(Resource):
@@ -33,7 +37,7 @@ class delete(Resource):
     @api.expect(label_model, validate=True)
     def post(self):
         """
-        获取数据
+        删除mongo对应标签数据
         """
         name = api.payload['label_name']
         return image_delete_mongo(name)
@@ -53,3 +57,69 @@ class clear(Resource):
         """
         """
         return img_clear()
+    
+@api.route('/write')
+class read(Resource):
+    @api.doc(description='')
+    @api.expect(label_model, validate=True)
+    def post(self):
+        """
+        """
+        name = api.payload['label_name']
+        img_list_withpath = image_from_video()
+        return image_read(img_list_withpath,name)
+    
+@api.route('/train')
+class train(Resource):
+    @api.doc(description='一台设备仅支持同时调用一次该接口，否则可能会出现报错')
+    @api.expect(label_model, validate=True)
+    def post(self):
+        """
+        模型训练
+        """
+        label = api.payload['label_name']
+
+        return train_new_label(label)
+    
+@api.route('/get_data')
+class get_datas(Resource):
+    @api.doc(description='')
+    @api.expect(label_model, validate=True)
+    def post(self):
+        """
+        获取数据
+        """
+        label = api.payload['label_name']
+
+        return get_data(label)
+####### 连接部分 #########
+connected = False 
+@socketio.on('connect') 
+# 当连接完毕
+def connect():
+    global connected
+    connected = True 
+
+# 当连接断开
+@socketio.on('disconnect') 
+def disconnect ():
+    global connected
+    connected = False
+
+
+source = path_config['source_path']
+@socketio.on('sent_img') 
+def sent():
+    print("tq2qadffqef")
+    cap = cv2.VideoCapture(int(source))
+    while cap.isOpened() and connected:
+        success, frame = cap.read()
+        frame = detect_goods(frame)
+        frame = base64(frame)
+        data =  {
+            'frame' : frame,
+        }
+        result = json.dumps(data)
+        socketio.emit('receive',result)  
+
+    cap.release()

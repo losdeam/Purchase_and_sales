@@ -30,7 +30,7 @@ def data_init():
         flag_init = False
 def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
     '''
-    将good_id的商品的数量添加nums\n
+    添加全新商品s\n
     input:\n
         good_name :商品id\n
         good_num : 收入仓库的商品数量\n
@@ -56,12 +56,14 @@ def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,g
                 "good_baseline" : good_baseline
             }
         data_result["message"] = f"全新商品{good_name},编号为{data.good_id},数据添加成功,现库存量{good_num}"
-        return jsonify(data_result)
+        data_result["good_id"] = data.good_id
+        data_result["code"] = 200
+        return data_result
     data = get_value(good_name,"good_name","goods")
     data_result["message"] = f"已存在同名商品{good_name},编号为{data.good_id}，商品添加失败"
-    data = jsonify(data_result) 
-    data.status_code = 401
-    return data
+    data_result["code"] = 403
+
+    return data_result
 def good_Replenish(good_id,nums):
     '''
     将good_id的商品的数量添加nums\n
@@ -125,6 +127,7 @@ def good_show():
     data_result["message"] = []
     data_init()
     goods_id_list = redis_client.hkeys('goods_name')
+    print(good_data)
     for good_id in goods_id_list:
         good_id = int(good_id)
         good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取

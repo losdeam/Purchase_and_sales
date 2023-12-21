@@ -7,6 +7,7 @@ import stock_goods from "../views/stock_goods.vue";
 import Header from "../components/Header.vue";
 import Login from "../views/Login.vue";
 import User from "../views/User.vue";
+import Recognition from "../views/recognition.vue";
 Vue.use(VueRouter);
  
 const routes = [
@@ -50,6 +51,11 @@ const routes = [
         path: "/page/user",
         name: "User",
         component: User,
+      },
+      {
+        path: "/page/recognition",
+        name: "recognition",
+        component: Recognition,
       },
     ],
   },

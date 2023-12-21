@@ -4,7 +4,7 @@ import os
 
 classes = ['fall'] # 标签值
 # 进行归一化操作
-def convert(size, box): # size:(原图w,原图h) , box:(xmin,xmax,ymin,ymax)
+def convert_data(size, box): # size:(原图w,原图h) , box:(xmin,xmax,ymin,ymax)
     dw = 1./size[0]     # 1/w
     dh = 1./size[1]     # 1/h
     x = (box[0] + box[1])/2.0   # 物体在图中的中心点x坐标
@@ -59,7 +59,7 @@ def convert_annotation(image_id):
                  float(xmlbox.find('ymax').text))
             # 带入进行归一化操作
             # w = 宽, h = 高， b= bndbox的数组 = ['xmin','xmax','ymin','ymax']
-            bb = convert((w, h), b)
+            bb = convert_data((w, h), b)
             # bb 对应的是归一化后的(x,y,w,h)
             # 生成 calss x y w h 在label文件中
             out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')

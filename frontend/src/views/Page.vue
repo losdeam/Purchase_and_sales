@@ -18,7 +18,10 @@
             <el-menu-item index="4" @click="btn4">
               <i class="el-icon-setting"></i>
               <span slot="title">用户管理</span>
-
+            </el-menu-item>
+            <el-menu-item index="5" @click="btn4">
+              <i class="el-icon-setting"></i>
+              <span slot="title">柜台识别</span>
             </el-menu-item>
           </el-menu>
         </el-col>
@@ -54,6 +57,9 @@
       },
       btn4() {
         this.$router.push("./User");
+      },
+      btn5() {
+        this.$router.push("./recognition");
       },
       handleOpen(key, keyPath) {
         console.log(key, keyPath);

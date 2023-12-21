@@ -12,3 +12,5 @@ ultralytics
 scikit-learn
 datetime
 ultralytics
+portalocker
+flask_socketio

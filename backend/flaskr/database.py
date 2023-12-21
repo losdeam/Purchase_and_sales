@@ -19,9 +19,6 @@ class Create(Resource):
             return {'message': '创建成功'}, 200
         except:
             return {'message': '创建失败'}, 500
-
-
-
 @api.route('/drop')
 class Drop(Resource):
     @api.doc(description='删除数据库')

@@ -99,6 +99,13 @@
         <el-input v-model="str_good_baseline" placeholder="输入内容">
         <template slot="prepend">商品基础保有量：</template>
         </el-input>
+        <div>
+          <input type="file" ref="fileInput" @change="handleFileChange" />
+          <p v-if="fileTypeValid">文件类型有效</p>
+          <p v-else>文件类型无效</p>
+        </div>
+
+        
       </div>
       <el-button @click="self_add_new_good">确定</el-button>
     </el-dialog>
@@ -118,6 +125,7 @@
 export default {
   data() {
     return {
+      fileTypeValid: false,
       formattedData :[],
       dialogVisible: false, // 添加这一行，初始化为 false
       stock_success: false,
@@ -148,28 +156,35 @@ export default {
         good_price_retail : 0,
         good_sort : '',
         good_baseline : 0,
+        good_video: null
       },
-      new_good_data:{
-        good_id: 0 ,
-        new_data:{
-          good_name : '',
-          good_num : 0,
-          good_price_buying : 0,
-          good_price_retail : 0,
-          good_sort : '',
-          good_baseline : 0,
-        },
-      },
-
       inputValue :'',
       dynamicText : ''
     };
   },
   mounted() {
     // 在组件加载时获取商品数据
-    this.fetchProducts();
+    this.fetchProducts()
+    // this.intervalId = setInterval(this.fetchProducts, 5000);
   },
   methods: {
+    handleFileChange() {
+      const fileInput = this.$refs.fileInput;
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const allowedFileTypes = ['video/mp4']; // 允许的文件类型
+        console.log(file.type);
+        if (allowedFileTypes.includes(file.type)) {
+          this.fileTypeValid = true;
+          this.new_goods.good_video = file
+
+        } else {
+          this.fileTypeValid = false;
+          alert('无效的文件类型，请选择正确的文件类型。');
+          // 或者你可以通过其他方式提示用户选择正确的文件类型
+        }
+      }
+    },
     fetchProducts() {
       // 使用后端提供的接口获取商品数据
       fetch("http://127.0.0.1:50000/api/goods/low", {
@@ -228,7 +243,7 @@ export default {
         })
         .then((data) => {
           this.dynamicText = data;
-          this.fetchProducts();
+
           // 执行交易后刷新商品数据
           
         })
@@ -237,13 +252,19 @@ export default {
         });
     },
     add_new_good_post(){
+      const good_formData = new FormData();
+      good_formData.append('good_name', this.new_goods.good_name);
+      good_formData.append('good_num', this.new_goods.good_num);
+      good_formData.append('good_price_buying', this.new_goods.good_price_buying);
+      good_formData.append('good_price_retail', this.new_goods.good_price_retail);
+      good_formData.append('good_sort', this.new_goods.good_sort);
+      good_formData.append('good_baseline', this.new_goods.good_baseline);
+      good_formData.append('good_video', this.new_goods.good_video);
+
       fetch("http://127.0.0.1:50000/api/goods/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include", // 添加此行，确保携带 Cookie
-        body: JSON.stringify(this.new_goods),
+        body: good_formData,
       })
         .then((response) => {
           // 检查响应状态码
@@ -257,6 +278,8 @@ export default {
         })
         .then((data) => {
           this.dynamicText =  data["message"];
+          this.fetchProducts()
+
           // 执行交易后刷新商品数据  
         })
         .catch((error) => {
@@ -348,7 +371,7 @@ export default {
       this.new_goods.good_price_buying = parseFloat(this.str_good_price_buying)
       this.new_goods.good_price_retail = parseFloat(this.str_good_price_retail)
       this.new_goods.good_sort = this.str_good_sort
-      this.new_goods.good_baseline = parseInt(this.str_good_baseline_name, 10);
+      this.new_goods.good_baseline = parseInt(this.str_good_baseline, 10);
       this.add_new_good_post()
       this.add_new_good = false;
     },
