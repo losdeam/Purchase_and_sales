@@ -127,7 +127,7 @@ def good_show():
     data_result["message"] = []
     data_init()
     goods_id_list = redis_client.hkeys('goods_name')
-    print(good_data)
+    # print(good_data)
     for good_id in goods_id_list:
         good_id = int(good_id)
         good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取

@@ -19,7 +19,7 @@
               <i class="el-icon-setting"></i>
               <span slot="title">用户管理</span>
             </el-menu-item>
-            <el-menu-item index="5" @click="btn4">
+            <el-menu-item index="5" @click="btn5">
               <i class="el-icon-setting"></i>
               <span slot="title">柜台识别</span>
             </el-menu-item>

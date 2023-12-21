@@ -110,16 +110,16 @@ def disconnect ():
 source = path_config['source_path']
 @socketio.on('sent_img') 
 def sent():
-    print("tq2qadffqef")
     cap = cv2.VideoCapture(int(source))
     while cap.isOpened() and connected:
         success, frame = cap.read()
         frame = detect_goods(frame)
-        frame = base64(frame)
-        data =  {
-            'frame' : frame,
-        }
-        result = json.dumps(data)
-        socketio.emit('receive',result)  
+        _, buffer = cv2.imencode('.jpg', frame)
+        base64_frame = base64.b64encode(buffer).decode('utf-8')
+        if connected:
+            socketio.emit('receive',        data =  {
+                'frame' : base64_frame,
+            })  
+        
 
     cap.release()

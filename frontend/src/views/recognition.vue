@@ -12,7 +12,7 @@ import io from 'socket.io-client';
 export default {
   data() {
     return {
-      videoFrame: ''
+      videoFrame: null
     };
   },
   created() {
@@ -21,8 +21,9 @@ export default {
     this.socket = io('http://127.0.0.1:50000');
     // 监听来自服务器的视频帧消息
     this.socket.on('receive', (data) => {
-      console.log(data)
-      this.videoFrame = 'data:image/jpeg;base64,' + data.image;
+      this.videoFrame = 'data:image/jpeg;base64,' + data.frame;
+      console.log(this.videoFrame)
+  
     });
 
     // 发送请求视频流的消息

@@ -1,20 +1,17 @@
 from ultralytics import YOLO
-import yaml
-import cv2 
-import time 
 from instance.yolo_config import path_config
 # file_path,
 # 加载预训练的YOLOv8n模型
 
 model_path = path_config['model_path']
 model = YOLO(model_path)
-source= path_config['source_path']
 
 def detect_goods(img):
-    results = model(img, imgsz=640, conf=0.3)
-# 在帧上可视化结果
-    annotated_frame = results[0].plot()
-    return annotated_frame
+    if img.any :
+        results = model(source=img, imgsz=640, conf=0.3)
+    # 在帧上可视化结果
+        annotated_frame = results[0].plot()
+        return annotated_frame
 
 
 
