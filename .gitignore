@@ -1,4 +1,7 @@
 *.pyc
+*.cache
 backend/instance/
 
 node_modules
+backend/function/recognition/
+test
