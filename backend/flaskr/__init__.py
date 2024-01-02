@@ -29,11 +29,13 @@ def create_app():
 
     # 导入并注册命名空间
     from . import goods
-    from . import database
-    from . import auth
-    from . import recognition
-    api.add_namespace(database.api)
     api.add_namespace(goods.api)
+    from . import database
+    api.add_namespace(database.api)
+    from . import auth
     api.add_namespace(auth.api)
+    from . import recognition
     api.add_namespace(recognition.api)
+    from . import test
+    api.add_namespace(test.api)
     return app

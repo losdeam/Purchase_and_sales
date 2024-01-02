@@ -3,6 +3,22 @@
 <template>
   <div>
     <img :src="videoFrame" alt="Video Frame" style="max-width: 100%; max-height: 100%;">
+  
+    <el-table
+        border
+        style="width: 100%"
+        :data="formattedData"
+        element-loading-text="拼命加载中"
+      >
+
+        <template slot-scope="scope">
+          <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
+          <el-button @click="add_good(scope.row)">训练</el-button>
+          <el-button @click="add_good(scope.row)">训练</el-button>
+
+        </template>      
+
+      </el-table>
   </div>
 </template>
 
@@ -28,6 +44,9 @@ export default {
 
     // 发送请求视频流的消息
     this.socket.emit('sent_img');
+  },
+  train(){
+    
   },
   beforeDestroy() {
     // 断开 Socket.IO 连接

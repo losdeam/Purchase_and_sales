@@ -100,8 +100,14 @@
         <template slot="prepend">商品基础保有量：</template>
         </el-input>
         <div>
-          <input type="file" ref="fileInput" @change="handleFileChange" />
-          <p v-if="fileTypeValid">文件类型有效</p>
+          <label for="fileInput">请上传拍摄的商品视频：</label>
+          <input type="file" ref="fileInput" text="123" @change="handleFileChange" />
+
+          <p v-if="fileTypeValid1">文件类型有效</p>
+          <p v-else>文件类型无效</p>
+          <label for="bg_img">请上传视频的背景图片文件：</label>
+          <input type="file" ref="bg_img" @change="bg_imgChange" />
+          <p v-if="fileTypeValid2">文件类型有效</p>
           <p v-else>文件类型无效</p>
         </div>
 
@@ -125,7 +131,8 @@
 export default {
   data() {
     return {
-      fileTypeValid: false,
+      fileTypeValid1: false,
+      fileTypeValid2: false,
       formattedData :[],
       dialogVisible: false, // 添加这一行，初始化为 false
       stock_success: false,
@@ -156,7 +163,11 @@ export default {
         good_price_retail : 0,
         good_sort : '',
         good_baseline : 0,
-        good_video: null
+      },
+      train:{
+        good_video : null ,
+        bg_img : null,
+        good_id : null , 
       },
       inputValue :'',
       dynamicText : ''
@@ -175,11 +186,28 @@ export default {
         const allowedFileTypes = ['video/mp4']; // 允许的文件类型
         console.log(file.type);
         if (allowedFileTypes.includes(file.type)) {
-          this.fileTypeValid = true;
-          this.new_goods.good_video = file
+          this.fileTypeValid1 = true;
+          this.train.good_video = file
 
         } else {
-          this.fileTypeValid = false;
+          this.fileTypeValid1 = false;
+          alert('无效的文件类型，请选择正确的文件类型。');
+          // 或者你可以通过其他方式提示用户选择正确的文件类型
+        }
+      }
+    },
+    bg_imgChange() {
+      const fileInput = this.$refs.bg_img;
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const allowedFileTypes = ['image/jpeg']; // 允许的文件类型
+        console.log(file.type);
+        if (allowedFileTypes.includes(file.type)) {
+          this.fileTypeValid2 = true;
+          this.train.bg_img = file
+
+        } else {
+          this.fileTypeValid2 = false;
           alert('无效的文件类型，请选择正确的文件类型。');
           // 或者你可以通过其他方式提示用户选择正确的文件类型
         }
@@ -251,20 +279,15 @@ export default {
           console.error("Error performing transaction:", error);
         });
     },
-    add_new_good_post(){
-      const good_formData = new FormData();
-      good_formData.append('good_name', this.new_goods.good_name);
-      good_formData.append('good_num', this.new_goods.good_num);
-      good_formData.append('good_price_buying', this.new_goods.good_price_buying);
-      good_formData.append('good_price_retail', this.new_goods.good_price_retail);
-      good_formData.append('good_sort', this.new_goods.good_sort);
-      good_formData.append('good_baseline', this.new_goods.good_baseline);
-      good_formData.append('good_video', this.new_goods.good_video);
-
-      fetch("http://127.0.0.1:50000/api/goods/add", {
+    train_new_model(){
+      const formData = new FormData();
+      formData.append('good_video', this.train.good_video);
+      formData.append('bg_img', this.train.bg_img);
+      formData.append('good_id', this.train.good_id);
+      fetch("http://127.0.0.1:50000/api/recognition/train", {
         method: "POST",
         credentials: "include", // 添加此行，确保携带 Cookie
-        body: good_formData,
+        body: formData,
       })
         .then((response) => {
           // 检查响应状态码
@@ -277,7 +300,46 @@ export default {
           return response.json();
         })
         .then((data) => {
-          this.dynamicText =  data["message"];
+          if (this.stock_fail) {
+            this.dynamicText =  data["message"];
+          }
+          else{
+            this.dynamicText =  data["message"];
+            alert('训练完成');
+          }
+          this.fetchProducts()
+
+          // 执行交易后刷新商品数据  
+        })
+        .catch((error) => {
+          console.error("Error performing transaction:", error);
+        });
+    },
+    add_new_good_post(){
+      fetch("http://127.0.0.1:50000/api/goods/add", {
+        method: "POST",
+        credentials: "include", // 添加此行，确保携带 Cookie
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(this.new_goods),
+      })
+        .then((response) => {
+          // 检查响应状态码
+          if (!response.ok) {
+            this.stock_fail = true;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (this.stock_fail) {
+            this.dynamicText =  data["error"];
+          }
+          else{
+            this.dynamicText =  '已成功将商品数据上传至数据库,请等待训练完成';
+            this.train.good_id = data["good_id"];
+            this.train_new_model()
+          }
           this.fetchProducts()
 
           // 执行交易后刷新商品数据  
@@ -375,8 +437,8 @@ export default {
       this.add_new_good_post()
       this.add_new_good = false;
     },
-
   },
 };
+
 
 </script>

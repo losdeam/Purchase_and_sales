@@ -4,30 +4,34 @@ from flaskr.models import Goods
 from flask import jsonify
 import pandas as pd 
 import datetime  
-import string
+import json
 
-
-good_data = {}
-flag_init = True 
-
-def data_init():
+def data_init(good_id=0):
     '''
     页面数据初始化
     '''
-    global good_data
-    global flag_init 
-    if flag_init:
+    if not redis_client.hget('good_data', good_id):
         goods_list = Goods.query.all()
         for good in goods_list:
             good_id = good.good_id
-            good_data[good_id]= {
+            good_data={
                 "good_name" : good.good_name,
                 "good_price_buying" : good.good_price_buying,
                 "good_price_retail" : good.good_price_retail,
                 "good_sort" : good.good_sort ,
                 "good_baseline" : good.good_baseline
             }
-        flag_init = False
+            good_data_json = json.dumps(good_data)
+            redis_client.hset("good_data",good_id,good_data_json)
+def data_get(good_id):
+    '''
+    获取json数据
+    '''
+    data = redis_client.hget('good_data', good_id)
+    # print(data)
+    return json.loads(data)
+
+
 def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
     '''
     添加全新商品s\n
@@ -48,20 +52,22 @@ def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,g
         data = get_value(good_name,"good_name","goods")
         redis_client.hset("goods_num",data.good_id,good_num)
         redis_client.hset("goods_name",data.good_id,good_name)
-        good_data[data.good_id]= {
+        good_data= {
                 "good_name" : good_name,
                 "good_price_buying" : good_price_buying,
                 "good_price_retail" : good_price_retail,
                 "good_sort" : good_sort ,
                 "good_baseline" : good_baseline
             }
+        good_data_json = json.dumps(good_data)
+        redis_client.hset("good_data",data.good_id,good_data_json)
         data_result["message"] = f"全新商品{good_name},编号为{data.good_id},数据添加成功,现库存量{good_num}"
         data_result["good_id"] = data.good_id
         data_result["code"] = 200
         return data_result
     data = get_value(good_name,"good_name","goods")
     data_result["message"] = f"已存在同名商品{good_name},编号为{data.good_id}，商品添加失败"
-    data_result["code"] = 403
+    data_result["code"] = 401
 
     return data_result
 def good_Replenish(good_id,nums):
@@ -105,47 +111,52 @@ def good_nums_verify():
     '''
     data_result = {}
     data_result["message"] = []
-    data_init()
+    
     goods_id_list = redis_client.hkeys('goods_name')
     for good_id in goods_id_list:
+        
         good_id = int(good_id)
+        good_data = data_get(good_id)
+        good_data["good_baseline"] = int(good_data["good_baseline"])
         good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取
-        if good_num <= good_data[good_id]["good_baseline"]:
+        if good_num <= good_data["good_baseline"]:
             data_result["message"].append({"good_id":int(good_id),\
-                                       "good_name":good_data[good_id]["good_name"], \
+                                       "good_name":good_data["good_name"], \
                                        "good_num":good_num, \
-                                        "good_sort" : good_data[good_id]["good_sort"] , \
-                                        "good_baseline" : good_data[good_id]["good_baseline"]\
+                                        "good_sort" : good_data["good_sort"] , \
+                                        "good_baseline" : good_data["good_baseline"]\
                                        })
     return jsonify(data_result)
 def good_show():
     '''
     展示所有商品及其库存
     '''
-
     data_result = {}
     data_result["message"] = []
-    data_init()
+    
     goods_id_list = redis_client.hkeys('goods_name')
-    # print(good_data)
+
     for good_id in goods_id_list:
+        
         good_id = int(good_id)
+        good_data = data_get(good_id)
+        # print(good_data)
         good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取
         data_result["message"].append({"good_id":int(good_id),\
-                                       "good_name":good_data[good_id]["good_name"], \
-                                       "good_price_buying":good_data[good_id]["good_price_buying"], \
+                                       "good_name":good_data["good_name"], \
+                                       "good_price_buying":good_data["good_price_buying"], \
                                        "good_num":good_num, \
-                                       "good_price_retail" : good_data[good_id]["good_price_retail"], \
-                                        "good_sort" : good_data[good_id]["good_sort"] , \
-                                        "good_baseline" : good_data[good_id]["good_baseline"]\
+                                       "good_price_retail" : good_data["good_price_retail"], \
+                                        "good_sort" :good_data["good_sort"] , \
+                                        "good_baseline" : good_data["good_baseline"]\
                                        })
     return jsonify(data_result)
 def good_delete(good_id):
     '''
-    删除对应的商品
+    删除对应的商品,带余量检测机制
     '''
     result = {}
-    data_init()
+
     good_num = int(redis_client.hget('goods_num', good_id))
     good_name = redis_client.hget('goods_name', good_id).decode()
     if good_num != 0 :
@@ -156,15 +167,27 @@ def good_delete(good_id):
     delete_value(good_id,"good_id","goods")
     redis_client.hdel('goods_name', good_id)
     redis_client.hdel('goods_num', good_id)
-    result["message"] = f"商品{good_name},已成功删除"
+    result["message"] = f"{good_id}号商品{good_name},已成功删除"
     return jsonify(result) 
+
+def good_delete_f(good_id):
+    '''
+    删除对应的商品，强制删除
+    '''
+    result = {}
+    good_name = redis_client.hget('goods_name', good_id).decode()
+    delete_value(good_id,"good_id","goods")
+    redis_client.hdel('goods_name', good_id)
+    redis_client.hdel('goods_num', good_id)
+    result["message"] = f"{good_id}号商品{good_name},已成功删除"
+    return jsonify(result) 
+
 def good_conifg(good_id,new_data):
     data_result = {}
-    data_init()
     data_result["message"] = update_data(good_id,"good_id","goods",new_data)
     for key,value in new_data.items():
         if value :
-            good_data[good_id][key] = value
+            data_get(good_id)[key] = value
     result = jsonify(data_result)
     return result
 def show_sale_record(n=3):
@@ -175,13 +198,12 @@ def show_sale_record(n=3):
     '''
     data_result = {}
     data_result["message"] = []
-    data_init()
     datas = get_values_time(datetime.datetime.now()- datetime.timedelta(days=n),"time_stamp","sales_records")
     if datas:
         for data in datas:
             data_result["message"].append({"time_stamp":data[0].time_stamp.strftime("%Y-%m-%d %H:%M:%S"),\
                                         "good_id":data[0].good_id, \
-                                        "good_name": good_data[data[0].good_id]["good_name"] if data[0].good_id in good_data else "商品已下架",\
+                                        "good_name": data_get(data[0].good_id)["good_name"] if redis_client.hget('good_data', data[0].good_id) else "商品已下架",\
                                         "good_num":data[0].good_num, \
                                         })
 

@@ -25,6 +25,7 @@
                 <el-button type="primary">确 定</el-button>
               </span>
             </el-dialog>
+            <el-button @click="update_init(scope.row)">信息更新</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -48,6 +49,26 @@
         </div>
           <el-button @click="add_new_user_confirm">确定</el-button>
       </div>
+    </el-dialog>
+    <el-dialog title="修改商品信息"
+      :visible.sync="update_user"
+      width="30%"
+    >
+      <div>
+        <el-input v-model="str_username" placeholder="输入内容">
+        <template slot="prepend">用户名：</template>
+        </el-input>
+        <el-input v-model="str_user_password" placeholder="输入内容">
+        <template slot="prepend">用户密码：</template>
+        </el-input>
+        <el-input v-model="str_user_rank" placeholder="输入内容">
+        <template slot="prepend">是否为管理员：</template>
+        </el-input>
+        <el-input v-model="str_user_power" placeholder="输入内容">
+        <template slot="prepend">用户权限：</template>
+        </el-input>
+      </div>
+      <el-button @click="update_user_button">确定</el-button>
     </el-dialog>
     <el-dialog title="操作成功"
       :visible.sync="operation_success"

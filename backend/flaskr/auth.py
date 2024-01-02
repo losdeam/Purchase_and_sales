@@ -54,7 +54,6 @@ class Login(Resource):
             logout_user()
         args = api.payload
         data = auth_login(args)
-
         return data
 @api.route('/logout')
 class Logout(Resource):
@@ -88,3 +87,16 @@ class delete(Resource):
             id = api.payload['user_id']
             return delete_auth(id)
         return {'message': '当前用户不具有删除其他用户的权限'}, 403     
+@api.route('/update')
+class update(Resource):
+    @api.doc(description='商品数据更改')
+    def post(self):
+        '''
+        对商品数据进行修改
+        '''
+        if (current_user.power >>1) &1 :  # type: ignore
+            user_id = api.payload['user_id']
+            new_data = api.payload['new_data']
+        
+            return  delete_auth(user_id ,new_data)
+        return {'message': '当前用户不具有修改商品信息的权限'}, 403     

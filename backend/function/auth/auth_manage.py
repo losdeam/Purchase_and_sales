@@ -1,46 +1,53 @@
 from function.sql import upload_data,get_value, get_values,get_values_time,delete_value,update_data
 from flaskr.models import Goods
 from flaskr.models import User
+from flaskr.extensions import redis_client
 from flask_login import login_user
 from flask import jsonify
 from werkzeug.security import generate_password_hash,check_password_hash
 import re
+import json
 
 
-user_data = {}
-flag_init = True 
-def data_init():
+def data_init(user_id=0):
     '''
     页面数据初始化
     '''
-    global user_data
-    global flag_init 
-    if flag_init:
+    if not redis_client.hget('user_data', user_id):
         user_list = User.query.all()
         for user in user_list:
             user_id = user.user_id
-            user_data[user_id]= {
+            user_data = {
                 "user_name" : user.username,
                 "user_rank" : user.rank,
                 "user_power" : str(bin(user.power))[2:].zfill(4),
             }
-        flag_init = False
+            user_data_json = json.dumps(user_data)
+            redis_client.hset("user_data",user_id,user_data_json)
+def data_get(user_id):
+    '''
+    获取json数据
+    '''
+    data = redis_client.hget('user_data', user_id)
+    return json.loads(data)
 def auth_show():
     '''
     展示当前所有的用户及其权限
     '''
     data_result = {}
     data_result["message"] = []
-    data_init()
-    for i in user_data:
+    user_id_list = redis_client.hkeys('user_data')
+
+    for user_id in user_id_list:
+        user_id = int(user_id)
+        user_data = data_get(user_id)
         data_result["message"].append({
-                "user_id":i,\
-                "user_name" : user_data[i]["user_name"],\
-                "user_rank" : user_data[i]["user_rank"],\
-                "user_power" : user_data[i]["user_power"],\
+                "user_id":user_id,\
+                "user_name" : user_data["user_name"],\
+                "user_rank" : user_data["user_rank"],\
+                "user_power" : user_data["user_power"],\
                                        })
-        
-    return jsonify(data_result)
+    return data_result
 def change_auth_data():
     '''
     在拥有管理员身份的前提下，对用户权限进行修改\n
@@ -60,11 +67,20 @@ def delete_auth(user_id):
     在拥有管理员身份的前提下，对用户进行删除\n
     '''
     result = {}
-    data_init()
     delete_value(user_id,"user_id","user")
-    del user_data[user_id]
+    redis_client.hdel("user_data", user_id)
     result["message"] = f"用户{user_id},已成功删除"
     return jsonify(result) 
+
+def auth_conifg(user_id,new_data):
+    data_result = {}
+    data_result["message"] = update_data(user_id,"good_id","goods",new_data)
+    for key,value in new_data.items():
+        if value :
+            data_get(user_id)[key] = value
+    result = jsonify(data_result)
+    return result
+
 def auth_register(data):
     '''通过输入的用户信息来进行用户登录\n
     input:\n
@@ -95,11 +111,15 @@ def auth_register(data):
     upload_data({"username": user_name, "password": password,
                  "rank": rank,"power": power}, "user")
     data = get_value(user_name,"username","user")
-    user_data[data.user_id]= {
+    user_data= {
                 "user_name" : user_name,
                 "user_rank" : rank,
                 "user_power" : str(bin(power))[2:].zfill(4),
             }
+    
+    user_data_json = json.dumps(user_data)
+    redis_client.hset("user_data",data.user_id,user_data_json)
+
     data_result["message"] = "注册成功"
 
     return data_result, 200
