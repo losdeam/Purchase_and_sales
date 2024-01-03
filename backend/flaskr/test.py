@@ -143,6 +143,7 @@ def disconnect ():
     connected = False
 
 
+
 @socketio.on('sent_img') 
 def sent():
     source = path_config['source_path']

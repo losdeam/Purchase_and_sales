@@ -23,6 +23,10 @@
               <i class="el-icon-setting"></i>
               <span slot="title">柜台识别</span>
             </el-menu-item>
+            <el-menu-item index="6" @click="btn6">
+              <i class="el-icon-setting"></i>
+              <span slot="title">模型管理</span>
+            </el-menu-item>
           </el-menu>
         </el-col>
         <el-main>

@@ -86,8 +86,6 @@ def image_to_mongo(label):
         document = {'image':encoded_image,"name":image_name,"label_txt":content,"label":label}
         collection.insert_one(document)
     data["message"].append("添加完毕")
-    image_delete_local(image_flie_path)
-    image_delete_local(label_flie_path)
     return data
 @count_time
 def data_from_mongo(num_images_to_select):
@@ -150,7 +148,7 @@ def image_from_video( target_frame_count ,video=None ,output_folder = image_flie
         while frame_count//capture_interval < target_frame_count:
             ret, frame = cap.read()
             if not ret:
-                break  # 视频读取结束
+                break  # 视频读取结束   
             # 每隔一定帧数截取一帧
             if frame_count % capture_interval == 0:
                 output_path = os.path.join(output_folder, f"{start_index + frame_count // capture_interval}.jpg")
@@ -181,10 +179,11 @@ def image_read(img_list_withpath,label,bg_img,test= False):
 
     bg_reisze_img= cv2.resize(bg_img ,img_size)
 
-    orignimg_bg_around_list = bg_around(bg_reisze_img,orign_resize_img_list)
-    # 获取商品图片
+
+    # 获取商品图片  
     cluster_center_img_list = []
     cluster_border_list =[]
+    cluster_center_list = []
     for orign_resize_img in orign_resize_img_list:
         # 寻找聚类中心
         cluster_centers = get_cluster_centers(orign_resize_img)
@@ -192,16 +191,16 @@ def image_read(img_list_withpath,label,bg_img,test= False):
         cluster_center_img,cluster_border = get_center_img(orign_resize_img,cluster_centers)
         cluster_center_img_list.append(cluster_center_img)
         cluster_border_list.append(cluster_border)
+        cluster_center_list.append(cluster_centers)
 
-
-    good_index_list,good_cluster_list = find_goods_centers(bg_reisze_img,cluster_center_img_list)
-    good_border = get_goods(bg_reisze_img,good_index_list,orignimg_bg_around_list,cluster_border_list)
+    goods_index_list,good_cluster_list = find_goods_centers(bg_reisze_img,cluster_center_img_list)
+    goods_border = get_goods(bg_reisze_img,goods_index_list,orign_resize_img_list,cluster_center_list,cluster_border_list,is_show=False )
 
 
 
     # 生成yolo格式的标注数据
-    for index,i in enumerate(good_index_list):
-        x_min,x_max,y_min,y_max = good_border[index]
+    for index,i in enumerate(goods_index_list):
+        x_min,x_max,y_min,y_max = goods_border[index]
         good_img_path  = good_imgfile_path + '/' + f"{index}" + ".jpg"
         cv2.imwrite(good_img_path,orign_resize_img_list[index][y_min:y_max,x_min:x_max])
         bb = convert_data(img_size,(x_min,x_max,y_min,y_max))
