@@ -1,6 +1,7 @@
 from function.sql import upload_data,get_value, get_values,get_values_time,delete_value,update_data
 from flaskr.extensions import redis_client
 from flaskr.models import Goods
+from function.util import image_delete_mongo,yaml_detele
 from flask import jsonify
 import pandas as pd 
 import datetime  
@@ -30,8 +31,6 @@ def data_get(good_id):
     data = redis_client.hget('good_data', good_id)
     # print(data)
     return json.loads(data)
-
-
 def good_add(good_name ,good_num,good_price_buying,good_price_retail,good_sort,good_baseline):
     '''
     添加全新商品s\n
@@ -140,7 +139,6 @@ def good_show():
         
         good_id = int(good_id)
         good_data = data_get(good_id)
-        # print(good_data)
         good_num = int(redis_client.hget('goods_num', good_id)) # 变化频率高的使用redis进行读取
         data_result["message"].append({"good_id":int(good_id),\
                                        "good_name":good_data["good_name"], \
@@ -167,9 +165,11 @@ def good_delete(good_id):
     delete_value(good_id,"good_id","goods")
     redis_client.hdel('goods_name', good_id)
     redis_client.hdel('goods_num', good_id)
+    image_delete_mongo(good_id)
+    yaml_detele(good_id)
+
     result["message"] = f"{good_id}号商品{good_name},已成功删除"
     return jsonify(result) 
-
 def good_delete_f(good_id):
     '''
     删除对应的商品，强制删除
@@ -181,7 +181,6 @@ def good_delete_f(good_id):
     redis_client.hdel('goods_num', good_id)
     result["message"] = f"{good_id}号商品{good_name},已成功删除"
     return jsonify(result) 
-
 def good_conifg(good_id,new_data):
     data_result = {}
     data_result["message"] = update_data(good_id,"good_id","goods",new_data)

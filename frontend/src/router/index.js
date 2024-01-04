@@ -8,6 +8,7 @@ import Header from "../components/Header.vue";
 import Login from "../views/Login.vue";
 import User from "../views/User.vue";
 import recognition from "../views/recognition.vue";
+import model_operation from "../views/model_operation.vue";
 Vue.use(VueRouter);
  
 const routes = [
@@ -57,7 +58,11 @@ const routes = [
         name: "User",
         component: User,
       },
-
+      {
+        path: "/page/model_operation",
+        name: "model_operation",
+        component: model_operation,
+      },
     ],
   },
  

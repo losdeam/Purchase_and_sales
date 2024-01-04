@@ -65,6 +65,9 @@
       btn5() {
         this.$router.push("./recognition");
       },
+      btn6() {
+        this.$router.push("./model_operation");
+      },
       handleOpen(key, keyPath) {
         console.log(key, keyPath);
       },

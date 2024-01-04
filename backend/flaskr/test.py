@@ -1,11 +1,8 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
 from function.recognition import  * 
-from function.goods import good_add,good_sell,good_nums_verify,good_Replenish,good_show,show_sale_record,good_delete,good_conifg
-from flaskr.extensions import socketio
-from flaskr.extensions import db ,redis_client      # 导入数据库
-from flask_login import logout_user, login_required, current_user  # 用户认证
-from flask import request,jsonify
-from instance.yolo_config import path_config,train_config,image_config
+# from 
+from function.util import image_delete_mongo,image_delete_mongo_all,img_clear,data_from_mongo,image_delete_local,yaml_clear
+from instance.yolo_config import path_config,image_config,data_config
 import base64
 import cv2
 import time 
@@ -35,6 +32,16 @@ label_model = api.model('labelmodel', {
     'label_name': fields.String(max_length=100, required=True, description='标签名称'),
 })
 #-----------识别部分-----------
+@api.route('/mongo_delete')
+class mongo_delete(Resource):
+    @api.doc(description='删除')
+    @api.expect(label_model, validate=True)
+    def post(self):
+        """
+        删除mongo对应标签数据
+        """
+        name = api.payload['label_name']
+        return image_delete_mongo(name)
 @api.route('/get_data_video')
 class get_data_video(Resource):
     @api.expect(label_model, validate=True)
@@ -59,7 +66,7 @@ class get_data_mongo(Resource):
         """
         添加图像-mongo
         """
-        return data_from_mongo(train_config['sample_size'])
+        return data_from_mongo(data_config['sample_size'])
 
 @api.route('/image_operation_center')
 class image_operation_center(Resource):
@@ -68,7 +75,7 @@ class image_operation_center(Resource):
         """
         图像处理-获取商品位置
         """
-        return data_from_mongo(train_config['sample_size'])
+        return data_from_mongo(data_config['sample_size'])
     
 @api.route('/image_operation_split')
 class image_operation_split(Resource):
@@ -105,17 +112,7 @@ class clear(Resource):
         # 清空mongo中的数据
         image_delete_mongo_all()
 
-        # 清空yaml中数据
-        yaml_path = path_config['yaml_path']
-        with open(yaml_path, 'r') as file:
-            data = yaml.load(file, Loader=yaml.FullLoader)
-        # 修改指定键的值
-        data['names'] = []
-        data['nc'] = 0
-        # 写入修改后的内容回到文件
-        with open(yaml_path, 'w') as file:
-            yaml.dump(data, file, default_flow_style=False)
-        
+        yaml_clear()    
         # 
         return "清空完毕"
 
@@ -129,47 +126,3 @@ class detect(Resource):
         return detect_local()
 
 #----------------------
-#-----------连接部分-----------
-connected = False 
-@socketio.on('connect') 
-# 当连接完毕
-def connect():
-    global connected
-    connected = True 
-# 当连接断开
-@socketio.on('disconnect') 
-def disconnect ():
-    global connected
-    connected = False
-
-
-
-@socketio.on('sent_img') 
-def sent():
-    source = path_config['source_path']
-    try:
-        model = YOLO(path_config['model_path'])
-    except:
-        model = YOLO(path_config['origin_model_path'])
-    cap = cv2.VideoCapture(int(source))
-    while cap.isOpened() and connected:
-        success, frame = cap.read()
-        if not success :
-            time.sleep(1)
-            continue 
-
-        frame = detect_goods(model,frame)
-        _, buffer = cv2.imencode('.jpg', frame)
-        base64_frame = base64.b64encode(buffer).decode('utf-8')
-        if connected:
-            socketio.emit('receive',        data =  {
-                'frame' : base64_frame,
-            })  
-    cap.release()
-
-@socketio.on('sent_message') 
-def sent_message ():
-    global connected
-    connected = False
-
-#------------------------------

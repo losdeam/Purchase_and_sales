@@ -206,15 +206,5 @@ def resize_list(img_list):
         gray_result.append(gray_img)
         img_path_list.append(path)
     return result,gray_result,img_path_list
-def bg_around(bg_reisze_img,orign_resize_img_list):
-    '''
-    用背景图将原始图像包围,以防止越界的产生
-    '''
-    result =[]
-    for orign_resize_img in orign_resize_img_list:
-        result_horizontal1 = np.concatenate((bg_reisze_img, bg_reisze_img,bg_reisze_img), axis=1)
-        result_horizontal2 = np.concatenate((bg_reisze_img, orign_resize_img,bg_reisze_img), axis=1)
-        result_horizontal3 = np.concatenate((bg_reisze_img, bg_reisze_img,bg_reisze_img), axis=1)
-        result_vertical = np.concatenate((result_horizontal1,result_horizontal2,result_horizontal3), axis=0)
-        result.append(result_vertical)
-    return result
+
+

@@ -3,20 +3,23 @@
 <template>
   <div>
     <img :src="videoFrame" alt="Video Frame" style="max-width: 100%; max-height: 100%;">
-  
+
     <el-table
         border
         style="width: 100%"
         :data="formattedData"
         element-loading-text="拼命加载中"
       >
-
-        <template slot-scope="scope">
-          <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
+      <el-table-column prop="id" label="编号" > </el-table-column>
+      <el-table-column prop="name" label="商品名称" ></el-table-column>
+      <el-table-column prop="count" label="数量"> </el-table-column>
+      <el-table-column prop="price" label="单价"> </el-table-column>
+      <el-table-column prop="total" label="总价"> </el-table-column>
+<!--         
+      <template slot-scope="scope">
           <el-button @click="add_good(scope.row)">训练</el-button>
-          <el-button @click="add_good(scope.row)">训练</el-button>
-
         </template>      
+         -->
 
       </el-table>
   </div>
@@ -28,7 +31,8 @@ import io from 'socket.io-client';
 export default {
   data() {
     return {
-      videoFrame: null
+      videoFrame: null,
+      formattedData :[],
     };
   },
   created() {
@@ -39,7 +43,17 @@ export default {
     this.socket.on('receive', (data) => {
       this.videoFrame = 'data:image/jpeg;base64,' + data.frame;
       console.log(this.videoFrame)
-  
+      const rawData = JSON.stringify( data["message"]);
+      const parsedArray = JSON.parse(rawData);
+      this.formattedData = parsedArray.map(item => {
+          return {
+            id: item.goods_id,
+            name: item.goods_name,
+            count: item.goods_count,
+            price: item.goods_price,
+            total: item.goods_count*item.goods_price,
+          };
+        });
     });
 
     // 发送请求视频流的消息

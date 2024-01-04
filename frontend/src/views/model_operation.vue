@@ -1,16 +1,19 @@
 <template>
-    <el-table
+    <div>
+      <el-button type="primary" @click="train_strengthen">模型强化</el-button>
+      <el-table
       border
       style="width: 100%"
       :data="formattedData"
       v-loading="loading"
     >
-      <el-table-column prop="time_stamp" label="时间" > </el-table-column>
       <el-table-column prop="good_id" label="编号" ></el-table-column>
-      <el-table-column prop="name" label="商品名称" ></el-table-column>
-      <el-table-column prop="good_num" label="售出量"> </el-table-column>
+      <el-table-column prop="name" label="模型名称" ></el-table-column>
+      <el-table-column prop="good_num" label="操作"> </el-table-column>
   
     </el-table>
+    </div>
+    
   </template>
   
   <script>
@@ -19,11 +22,6 @@
     return {
       formattedData :[],
       products: [],
-      transaction: {
-        good_id: 1,
-        change_num: 0,
-        type: 1, // 默认为进货
-      },
     };
   },
   mounted() {

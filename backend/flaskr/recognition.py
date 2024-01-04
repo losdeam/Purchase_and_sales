@@ -1,11 +1,12 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
 # from function.recognition import image_to_mongo,data_from_mongo,image_delete_mongo,tranform,img_clear,image_read,image_from_video，
 from function.recognition import  * 
-from function.goods import good_delete_f
-from flaskr.extensions import socketio
+from function.goods import good_delete_f,data_get
+from flaskr.extensions import socketio,redis_client
 from flask import request,jsonify
 from instance.yolo_config import path_config
 from ultralytics import YOLO
+import collections
 import base64
 import cv2
 import time 
@@ -16,19 +17,7 @@ label_model = api.model('labelmodel', {
 })
 
 
-@api.route('/delete')
-class delete(Resource):
-    @api.doc(description='获取')
-    @api.expect(label_model, validate=True)
-    def post(self):
-        """
-        删除mongo对应标签数据
-        """
-        name = api.payload['label_name']
-        return image_delete_mongo(name)
 
-
-    
 @api.route('/train')
 class train(Resource):
     @api.doc(description='一台设备仅支持同时调用一次该接口，否则可能会出现报错')
@@ -71,9 +60,6 @@ class train(Resource):
             return result
 
         #--------------------训练模块--------------
-
-
-
 @api.route('/get_data')
 class get_datas(Resource):
     @api.doc(description='')
@@ -119,14 +105,18 @@ def sent():
         success, frame = cap.read()
         if not success :
             time.sleep(1)
-            continue 
+            break 
+        
+        data_result = detect_goods(model,frame)
 
-        frame = detect_goods(model,frame)
-        _, buffer = cv2.imencode('.jpg', frame)
+        recognize_data = get_good_data(data_result)
+        _, buffer = cv2.imencode('.jpg', data_result['image'])
         base64_frame = base64.b64encode(buffer).decode('utf-8')
+        # print(12314232131231,recognize_data)
         if connected:
             socketio.emit('receive',        data =  {
                 'frame' : base64_frame,
+                'message':recognize_data
             })  
         
 

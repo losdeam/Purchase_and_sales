@@ -11,20 +11,9 @@ def train_new_label():
         model = YOLO(source_model_path)
     except:
         model = YOLO(origin_model_path)
-        
+    args = train_config
     # 使用“coco128.yaml”数据集训练模型3个周期
-    results = model.train(data=yaml_path,imgsz = train_config['imgsz']  ,\
-                        epochs=train_config['epochs'],\
-                        amp = False,\
-                        augment	= train_config['augment'],\
-                        # mosaic= train_config['mosaic'],\
-                        # mixup= train_config['mixup'],\
-                        degrees =train_config['degrees'],\
-                        translate  =train_config['translate'],\
-                        scale= train_config['scale'] ,\
-                        
-                        flipud=train_config['flipud'],\
-                        fliplr=train_config['fliplr'])
+    results = model.train(data=yaml_path,**args )
 
 
 

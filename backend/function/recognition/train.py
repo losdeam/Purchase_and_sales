@@ -1,14 +1,16 @@
 import os 
 import time 
-from instance.yolo_config import path_config,train_config,image_config,model_config
-from .image_operation import image_from_video,img_clear,image_read,data_from_mongo,image_to_mongo,image_delete_local
+from instance.yolo_config import path_config,image_config,model_config,data_config
+from function.util import img_clear,data_from_mongo,image_to_mongo,image_delete_local
+from .image_operation import image_from_video,image_read
+
 from .util import SplitDataset,run_script
 
 
 use_model_path = path_config['model_path']
 image_flie_path = path_config["image_path"]
 video_flie_path = path_config["video_path"]
-num_images_to_select = train_config['sample_size']
+num_images_to_select = data_config['sample_size']
 target_frame_count = image_config['target_frame_count'] # 从视频中获取的图像数量
 train_model_path = path_config['train_model_path'] 
 train_script_path = path_config['train_script_path'] 
@@ -63,6 +65,10 @@ def arrange_model():
             leak +=1 
         dfs(index+1,leak)
     dfs(0,0)    
+# def delete_nowmodel():
+#     os.remove(old_model_path)
+#     arrange_model()
+
 def move_ptomodel():
     """
     将训练好的模型转移至模型文件夹中

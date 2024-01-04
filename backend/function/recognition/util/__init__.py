@@ -3,18 +3,18 @@ import random
 import yaml
 import subprocess
 
-from .get_good import get_cluster_centers,get_center_img,get_goods,resize_list,find_goods_centers,bg_around
+from .get_good import get_cluster_centers,get_center_img,get_goods,resize_list,find_goods_centers
 from .convert import  convert_annotation,convert_data
 from .lock import acquire_lock,release_lock
-from instance.yolo_config import path_config,train_config
+from instance.yolo_config import path_config,data_config
 # xml解析包
 sets = ['train', 'test', 'val']
 classes = ['fall','candy'] # 标签值
 imgfilepath = path_config['image_path']
 
 labelfilpath = path_config['label_path']
-trainval_percent = train_config["trainval_percent"]
-train_percent = train_config["train_percent"]
+trainval_percent = data_config["trainval_percent"] 
+train_percent = data_config["train_percent"] 
 yaml_path = path_config["yaml_path"]
 
 lock_file_path = "lock_file.lock"
