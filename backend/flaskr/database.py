@@ -1,8 +1,9 @@
 from flask_restx import Namespace, Resource    # RESTful API
-from flaskr.extensions import db      # 导入数据库
-import flaskr.models  # 务必导入模型
-from flaskr import redis_client
+from flaskr.extensions import mongo,redis_client   # 导入数据库
 
+from flaskr import redis_client
+from function.util import yaml_read,data_to_mongo,hash_password,data_init
+import os 
 api = Namespace('database', description='数据库操作接口')
 
 
@@ -14,10 +15,25 @@ class Create(Resource):
         创建数据库
         '''
         try:
-            db.create_all()
-            
+            # print(os.getcwd())
+            data = {
+                "id" : 0,
+                "name" : "adm",
+                "password" : hash_password("111"),
+                "rank" : 1,
+                "power" : 15,
+                "path_config" : yaml_read('./instance/path_config.yaml'),
+                "data_config" : yaml_read('./instance/data_config.yaml'),
+                "train_config" : yaml_read('./instance/train_config.yaml'),
+            }
+            # print(data)s
+            message,flag = data_to_mongo('user_data',data)
+            if not flag :
+                return {'message': '创建失败'}, 500
+            data_init()
             return {'message': '创建成功'}, 200
-        except:
+        except Exception as e :
+            print(e)
             return {'message': '创建失败'}, 500
 @api.route('/drop')
 class Drop(Resource):
@@ -27,9 +43,12 @@ class Drop(Resource):
         删除数据库
         """
         try:
-            db.drop_all()
-            if redis_client.exists('goods_num') : redis_client.delete('goods_num')
-            if redis_client.exists('goods_name') : redis_client.delete('goods_name')   
+            # 获取数据库中的所有集合名称
+            collection_names = mongo.db.list_collection_names()
+
+            # 删除每个集合
+            for collection_name in collection_names:
+                mongo.db.drop_collection(collection_name)
 
             return {'message': '删库成功'}, 200
         except:

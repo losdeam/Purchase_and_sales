@@ -1,13 +1,19 @@
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
-
+from function.util import get_config_data
 from skimage.metrics import structural_similarity as ssim
-from instance.yolo_config import image_config,path_config
-img_part_size = image_config['img_part_size']
-num_clusters = image_config['num_clusters']
-img_size = image_config['img_size']
-cluster_centers_file = path_config['cluster_centers_filepath']
+from instance.yolo_config import data_config,path_config
+import ast
+# img_part_size = data_config['img_part_size']
+# num_clusters = data_config['num_clusters']
+# img_size = data_config['img_size']
+
+#     img_size = get_config_data('data_config','img_size')
+    # img_size = ast.literal_eval(img_size)
+# img_part_size = get_config_data('data_config','img_part_size')
+# num_clusters = get_config_data('data_config','num_clusters')
+
 
 # 使用 BRISK 特征检测器
 brisk = cv2.SIFT_create()
@@ -20,6 +26,7 @@ def get_cluster_centers(img):
     output:
         cluster_centers: 聚类中心的坐标
     '''
+    num_clusters = get_config_data('data_config','num_clusters')
     # 在图像上检测关键点
     keypoints, _ = brisk.detectAndCompute(img, None)
     keypoint_coordinates = np.array([kp.pt for kp in keypoints])
@@ -38,6 +45,9 @@ def get_center_img(gray_img,center_list):
     output:
         cluster_centers: 聚类中心的坐标
     '''
+    img_size = get_config_data('data_config','img_size')
+    img_size = ast.literal_eval(img_size)
+    img_part_size = get_config_data('data_config','img_part_size')
     cluster_centers_img_list = []
     border_list = []
     for center_x,center_y in center_list:
@@ -76,10 +86,13 @@ def find_goods_centers(bg,cluster_center_img_list):
     #直接通过判断聚类中心与背景的相似度即可
     # 越不像的越可能是商品位置
     #--------------------------
+    img_size = get_config_data('data_config','img_size')
+    img_size = ast.literal_eval(img_size)
+    img_part_size = get_config_data('data_config','img_part_size')
     n = len(cluster_center_img_list)
     # 寻找相似度最低的聚类中心
     match_list = [1]*n
-    good_cluster_list = [None] *n
+    goods_cluster_list = [None] *n
     bg_resize_img = cv2.resize(bg, (img_part_size*2,img_part_size*2))
     # 遍历图像
     for i in range(n):
@@ -91,14 +104,14 @@ def find_goods_centers(bg,cluster_center_img_list):
                 if  similarity <= min_match:
                     min_match = similarity
                     match_list[i] = index
-        good_cluster_list[i] = cluster_center_img_list[i][match_list[i]]
-    return match_list,good_cluster_list
-def get_goods(bg_reisze_img,good_index_list,orign_resize_img_list,cluster_centers_list,cluster_border_list  ,size=img_size,is_show= False  ):
+        goods_cluster_list[i] = cluster_center_img_list[i][match_list[i]]
+    return match_list,goods_cluster_list
+def get_goods(bg_reisze_img,goods_index_list,orign_resize_img_list,cluster_centers_list,cluster_border_list  ,size=(320,320),is_show= False  ):
     '''
     根据获取到的商品聚类中心来寻找商品整体
     input :
         bg_reisze_img : 经过大小调整的背景图
-        good_index_list : 商品的聚类中心下标
+        goods_index_list : 商品的聚类中心下标
         orign_resize_img_list : 经过大小调整的原图列表
         cluster_centers_list : 图像聚类中心列表
         cluster_border_list : 图像聚类中心图像边界值
@@ -107,8 +120,11 @@ def get_goods(bg_reisze_img,good_index_list,orign_resize_img_list,cluster_center
     output : 
         result : 保存所有商品边界值的列表
     '''
+
+    img_size = get_config_data('data_config','img_size')
+    size = ast.literal_eval(img_size)
     result = []
-    for index , i in enumerate(good_index_list):
+    for index , i in enumerate(goods_index_list):
         orign_resize_img = orign_resize_img_list[index]
         center_x,center_y = map(int,cluster_centers_list[index][i])
         left_x,right_x,left_y,right_y = cluster_border_list[index][i]
@@ -130,7 +146,7 @@ def get_goods(bg_reisze_img,good_index_list,orign_resize_img_list,cluster_center
 
 
     return result
-def binary (bg_reisze_img,orign_resize_img,side ,site,size=img_size,is_left = False , is_x = True,is_show =False):
+def binary (bg_reisze_img,orign_resize_img,side ,site,size=(320,320),is_left = False , is_x = True,is_show =False):
     """
     input :
         bg_reisze_img : 经过大小调整的背景图
@@ -144,6 +160,7 @@ def binary (bg_reisze_img,orign_resize_img,side ,site,size=img_size,is_left = Fa
     output :
         left : 二分结果
     """
+    
     if is_left :
         left = site 
         right = size[0] if is_x else size[1] 
@@ -195,6 +212,9 @@ def binary (bg_reisze_img,orign_resize_img,side ,site,size=img_size,is_left = Fa
 def resize_list(img_list):
     '''
     '''
+
+    img_size = get_config_data('data_config','img_size')
+    img_size = ast.literal_eval(img_size)
     result= []
     gray_result = []
     img_path_list =[]

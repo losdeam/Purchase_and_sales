@@ -5,17 +5,18 @@ import shutil
 import cv2 
 import numpy as np
 import time 
-
-from instance.yolo_config import path_config,image_config
+import ast
+# from instance.yolo_config import path_config,data_config
 from flaskr.extensions import mongo
-from function.sql import get_all
+# from function.sql import get_all
 from .util import get_label_index,get_cluster_centers,get_center_img,get_goods,resize_list,convert_data,find_goods_centers
-image_flie_path = path_config["image_path"]
-label_flie_path = path_config["label_path"]
-video_flie_path = path_config["video_path"]
-target_frame_count = image_config['target_frame_count'] 
-img_size = image_config['img_size']
-goods_imgfile_path = path_config['goods_imgfile_path'] 
+from function.util import get_config_data
+# image_flie_path = path_config["image_path"]
+# label_flie_path = path_config["label_path"]
+# video_flie_path = path_config["video_path"]
+# target_frame_count = data_config['target_frame_count'] 
+# img_size = data_config['img_size']
+# goods_imgfile_path = path_config['goods_imgfile_path'] 
 def count_time(f):
     def warrp(*a,**b):
         t1 = time.time()
@@ -23,14 +24,13 @@ def count_time(f):
         print(f.__name__,"耗时",time.time()-t1)
         return t
     return warrp
-
-
 @count_time
-def image_from_video( target_frame_count ,video=None ,output_folder = image_flie_path,video_flie_path=video_flie_path):
+def image_from_video( target_frame_count ,video=None ):
     '''
     从视频中获取图像数据，
-    
     '''
+    video_flie_path = get_config_data('path_config','video_path')
+    output_folder = get_config_data('path_config','image_path')
     if  video:
         video_path = video_flie_path + '/' + '1.mp4'
         with open(video_path, 'wb') as f:
@@ -72,6 +72,12 @@ def image_read(img_list_withpath,label,bg_img,test= False):
         label: 图片的标签
         bg_img:背景图
     '''
+    goods_imgfile_path = get_config_data('path_config','goods_imgfile_path')
+    img_size = get_config_data('data_config','img_size')
+    img_size = ast.literal_eval(img_size)
+    label_flie_path = get_config_data('path_config','label_path')
+
+    img_size
     if not test:
         bg_img = cv2.imdecode(np.fromstring(bg_img.read(), np.uint8), cv2.IMREAD_COLOR)
     data = {}
@@ -96,7 +102,7 @@ def image_read(img_list_withpath,label,bg_img,test= False):
         cluster_border_list.append(cluster_border)
         cluster_center_list.append(cluster_centers)
 
-    goods_index_list,good_cluster_list = find_goods_centers(bg_reisze_img,cluster_center_img_list)
+    goods_index_list,goods_cluster_list = find_goods_centers(bg_reisze_img,cluster_center_img_list)
     goods_border = get_goods(bg_reisze_img,goods_index_list,orign_resize_img_list,cluster_center_list,cluster_border_list,is_show=False )
 
 
@@ -104,8 +110,8 @@ def image_read(img_list_withpath,label,bg_img,test= False):
     # 生成yolo格式的标注数据
     for index,i in enumerate(goods_index_list):
         x_min,x_max,y_min,y_max = goods_border[index]
-        good_img_path  = goods_imgfile_path + '/' + f"{index}" + ".jpg"
-        cv2.imwrite(good_img_path,orign_resize_img_list[index][y_min:y_max,x_min:x_max])
+        goods_img_path  = goods_imgfile_path + '/' + f"{index}" + ".jpg"
+        cv2.imwrite(goods_img_path,orign_resize_img_list[index][y_min:y_max,x_min:x_max])
         bb = convert_data(img_size,(x_min,x_max,y_min,y_max))
         with open(label_flie_path + "/"+f"{index}" + ".txt", 'w') as label_file:
             label_file.write(str(get_label_index(label)) + " " + " ".join([str(a) for a in bb]) + '\n')

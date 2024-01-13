@@ -6,9 +6,9 @@
 
   >
     <el-table-column prop="time_stamp" label="时间" > </el-table-column>
-    <el-table-column prop="good_id" label="编号" ></el-table-column>
+    <el-table-column prop="goods_id" label="编号" ></el-table-column>
     <el-table-column prop="name" label="商品名称" ></el-table-column>
-    <el-table-column prop="good_num" label="售出量"> </el-table-column>
+    <el-table-column prop="goods_num" label="售出量"> </el-table-column>
 
   </el-table>
 </template>
@@ -20,7 +20,7 @@ data() {
     formattedData :[],
     products: [],
     transaction: {
-      good_id: 1,
+      goods_id: 1,
       change_num: 0,
       type: 1, // 默认为进货
     },
@@ -38,6 +38,7 @@ methods: {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // 添加此行，确保携带 Cookie
     })
       .then((response) => response.json())
       .then((data) => {
@@ -47,9 +48,9 @@ methods: {
         this.formattedData = parsedArray.map(item => {
         return {
           time_stamp: item.time_stamp,
-          good_id: item.good_id,
-          name : item.good_name,
-          good_num: item.good_num
+          goods_id: item.goods_id,
+          name : item.goods_name,
+          goods_num: item.goods_num
         };
 
       });

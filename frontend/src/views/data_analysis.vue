@@ -25,26 +25,26 @@
       width="30%"
     >
       <div>
-        <el-input v-model="str_good_name" placeholder="输入内容">
+        <el-input v-model="str_goods_name" placeholder="输入内容">
         <template slot="prepend">商品名称：</template>
         </el-input>
-        <el-input v-model="str_good_num" placeholder="输入内容">
+        <el-input v-model="str_goods_num" placeholder="输入内容">
         <template slot="prepend">商品数量：</template>
         </el-input>
-        <el-input v-model="str_good_price_buying" placeholder="输入内容">
+        <el-input v-model="str_goods_price_buying" placeholder="输入内容">
         <template slot="prepend">进货价格：</template>
         </el-input>
-        <el-input v-model="str_good_price_retail" placeholder="输入内容">
+        <el-input v-model="str_goods_price_retail" placeholder="输入内容">
         <template slot="prepend">零售价格：</template>
         </el-input>
-        <el-input v-model="str_good_sort" placeholder="输入内容">
+        <el-input v-model="str_goods_sort" placeholder="输入内容">
         <template slot="prepend">商品分类：</template>
         </el-input>
-        <el-input v-model="str_good_baseline" placeholder="输入内容">
+        <el-input v-model="str_goods_baseline" placeholder="输入内容">
         <template slot="prepend">商品基础保有量：</template>
         </el-input>
       </div>
-      <el-button @click="update_good_button">确定</el-button>
+      <el-button @click="update_goods_button">确定</el-button>
     </el-dialog>
     <el-dialog title="操作成功"
       :visible.sync="stock_success"
@@ -81,26 +81,26 @@ export default {
       dynamicText: '',
       formattedData :[],
       products: [],
-      str_good_name : '',
-      str_good_num : '',
-      str_good_price_buying : '',
-      str_good_price_retail : '',
-      str_good_sort : '',
-      str_good_baseline : '',
+      str_goods_name : '',
+      str_goods_num : '',
+      str_goods_price_buying : '',
+      str_goods_price_retail : '',
+      str_goods_sort : '',
+      str_goods_baseline : '',
       transaction: {
-        good_id: 1,
+        goods_id: 1,
         change_num: 0,
         type: 1, // 默认为进货
       },
-      new_good_data:{
-        good_id: 0 ,
+      new_goods_data:{
+        goods_id: 0 ,
         new_data:{
-          good_name : '',
-          good_num : 0,
-          good_price_buying : 0,
-          good_price_retail : 0,
-          good_sort : '',
-          good_baseline : 0,
+          goods_name : '',
+          goods_num : 0,
+          goods_price_buying : 0,
+          goods_price_retail : 0,
+          goods_sort : '',
+          goods_baseline : 0,
         },
       },
       intervalId: null, 
@@ -136,20 +136,20 @@ export default {
 
           this.formattedData = parsedArray.map(item => {
           return {
-            id: item.good_id,
-            name: item.good_name,
-            price_buying: item.good_price_buying,
-            price_retail: item.good_price_retail,
-            sort: item.good_sort,
-            baseline: item.good_baseline,
-            number: item.good_num
+            id: item.goods_id,
+            name: item.goods_name,
+            price_buying: item.goods_price_buying,
+            price_retail: item.goods_price_retail,
+            sort: item.goods_sort,
+            baseline: item.goods_baseline,
+            number: item.goods_num
           };
 
         });
         })
 
     },
-    update_good_data() {
+    update_goods_data() {
       // 使用后端提供的接口执行交易
       fetch("http://127.0.0.1:50000/api/goods/update", {
         method: "POST",
@@ -157,7 +157,7 @@ export default {
           "Content-Type": "application/json",
         },
         credentials: "include", // 添加此行，确保携带 Cookie
-        body: JSON.stringify(this.new_good_data),
+        body: JSON.stringify(this.new_goods_data),
       })
       .then((response) => {
           // 检查响应状态码
@@ -180,18 +180,18 @@ export default {
     },
     update_init(row){
       this.update_good = true 
-      this.new_good_data.good_id = row.id
+      this.new_goods_data.goods_id = row.id
     },
-    update_good_button(){
+    update_goods_button(){
       
       
-      this.new_good_data.new_data.good_name = this.str_good_name
-      this.new_good_data.new_data.good_num = parseInt(this.str_good_num, 10);
-      this.new_good_data.new_data.good_price_buying = parseFloat(this.str_good_price_buying)
-      this.new_good_data.new_data.good_price_retail = parseFloat(this.str_good_price_retail)
-      this.new_good_data.new_data.good_sort = this.str_good_sort
-      this.new_good_data.new_data.good_baseline = parseInt(this.str_good_baseline, 10);
-      this.update_good_data()
+      this.new_goods_data.new_data.goods_name = this.str_goods_name
+      this.new_goods_data.new_data.goods_num = parseInt(this.str_goods_num, 10);
+      this.new_goods_data.new_data.goods_price_buying = parseFloat(this.str_goods_price_buying)
+      this.new_goods_data.new_data.goods_price_retail = parseFloat(this.str_goods_price_retail)
+      this.new_goods_data.new_data.goods_sort = this.str_goods_sort
+      this.new_goods_data.new_data.goods_baseline = parseInt(this.str_goods_baseline, 10);
+      this.update_goods_data()
       
       this.update_good = false 
     }

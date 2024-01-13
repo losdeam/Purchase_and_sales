@@ -1,51 +1,49 @@
-from function.sql import upload_data,get_value, get_values,get_values_time,delete_value,update_data
-from flaskr.models import Goods
-from flaskr.models import User
-from flaskr.extensions import redis_client
-from flask_login import login_user
+# from function.sql import upload_data,get_value, get_values,get_values_time,delete_value,update_data
+# from flaskr.models import Goods
+# from flaskr.models import User
+from flaskr.extensions import redis_client,login_manager
+from flask_login import login_user,UserMixin,current_user
 from flask import jsonify
-from werkzeug.security import generate_password_hash,check_password_hash
+from function.util import hash_password,verify_password,get_data,data_get_mongo,load_data,data_verify_total,yaml_read
+from function.util import data_to_mongo ,data_from_mongo,data_update_mongo,data_delete_mongo
 import re
 import json
 
-
-def data_init(user_id=0):
-    '''
-    页面数据初始化
-    '''
-    if not redis_client.hget('user_data', user_id):
-        user_list = User.query.all()
-        for user in user_list:
-            user_id = user.user_id
-            user_data = {
-                "user_name" : user.username,
-                "user_rank" : user.rank,
-                "user_power" : str(bin(user.power))[2:].zfill(4),
-            }
-            user_data_json = json.dumps(user_data)
-            redis_client.hset("user_data",user_id,user_data_json)
-def data_get(user_id):
-    '''
-    获取json数据
-    '''
-    data = redis_client.hget('user_data', user_id)
-    return json.loads(data)
+class User(UserMixin):
+    def __init__(self, user_data ):
+        self.id = user_data['id']
+        self.power =user_data['power']
+        self.name = user_data['name']
+        self.rank = user_data['rank']
+    def get_id(self):
+        return str(self.id)
+    
+# 用户加载函数
+@login_manager.user_loader
+def load_user(user_id):
+    print(123213123,user_id)
+    user_data = data_from_mongo('user_data',{'id':int(user_id)})[0]
+    if user_data:
+        return User(user_data)
+    return None
+ 
 def auth_show():
     '''
     展示当前所有的用户及其权限
     '''
     data_result = {}
     data_result["message"] = []
-    user_id_list = redis_client.hkeys('user_data')
+    user_name_list = redis_client.hkeys('user_data')
+ 
+    for user_name in user_name_list:
 
-    for user_id in user_id_list:
-        user_id = int(user_id)
-        user_data = data_get(user_id)
+        user_data = get_data('user_data',user_name)
+
         data_result["message"].append({
-                "user_id":user_id,\
-                "user_name" : user_data["user_name"],\
-                "user_rank" : user_data["user_rank"],\
-                "user_power" : user_data["user_power"],\
+                "user_id":user_data["id"],\
+                "user_name" : user_data["name"],\
+                "user_rank" : user_data["rank"],\
+                "user_power" : user_data["power"],\
                                        })
     return data_result
 def change_auth_data():
@@ -62,27 +60,24 @@ def change_auth_data():
     3. 权限赋予\n
     '''
     pass
-def delete_auth(user_id):
+def delete_auth(name):
     '''
     在拥有管理员身份的前提下，对用户进行删除\n
     '''
     result = {}
-    delete_value(user_id,"user_id","user")
-    redis_client.hdel("user_data", user_id)
-    result["message"] = f"用户{user_id},已成功删除"
+    data_delete_mongo(name,"name","user_data")
+    redis_client.hdel("user_data", name)
+    result["message"] = f"用户{name},已成功删除"
     return jsonify(result) 
 
 def auth_conifg(user_id,new_data):
     data_result = {}
-    data_result["message"] = update_data(user_id,"good_id","goods",new_data)
-    for key,value in new_data.items():
-        if value :
-            data_get(user_id)[key] = value
+    data_result["message"] = data_update_mongo(user_id,"id","user_data",new_data)
     result = jsonify(data_result)
     return result
 
 def auth_register(data):
-    '''通过输入的用户信息来进行用户登录\n
+    '''用户注册\n
     input:\n
         request:前端返回的json数据\n
         request/user_name :邮箱\n
@@ -95,34 +90,30 @@ def auth_register(data):
     '''
     data_result = {}
     data_result["message"] = ""
-    user_name = data["user_name"]
+    # -------------------密码安全性验证-------------
     password = data["password"]
-    rank = data['rank']
-    power = data['power']
-    user = get_value(user_name, "username", "user")
-    if  user:
-        data_result["message"] = "已存在同名用户"
-        return data_result , 401 
     flag, msg = check_password_secure(password)
-    password =generate_password_hash(password)
     if flag != 200:
         data_result["message"] = msg
         return data_result, 403
-    upload_data({"username": user_name, "password": password,
-                 "rank": rank,"power": power}, "user")
-    data = get_value(user_name,"username","user")
-    user_data= {
-                "user_name" : user_name,
-                "user_rank" : rank,
-                "user_power" : str(bin(power))[2:].zfill(4),
-            }
-    
-    user_data_json = json.dumps(user_data)
-    redis_client.hset("user_data",data.user_id,user_data_json)
+    # --------------------------------
+    data = {
+        "name" : data["name"],
+        "password" :hash_password(data["password"]) ,
+        "rank" : data['rank'],
+        "power" : data['power'],
+        "path_config" : yaml_read('./instance/path_config.yaml'),
+        "data_config" : yaml_read('./instance/data_config.yaml'),
+        "train_config" : yaml_read('./instance/train_config.yaml'),
+    }
 
-    data_result["message"] = "注册成功"
+    message,flag = data_to_mongo('user_data',data)
 
-    return data_result, 200
+    # print(12312321,message,flag)
+    if not flag :
+        return {'message': message}, 500
+    return {'message': '创建成功'}, 200
+
 def check_password_secure(password):
     '''
     密码安全性判断
@@ -177,10 +168,13 @@ def auth_login(data):
     '''
     user_name = data["user_name"]
     password = data["password"]
-    user = get_value(user_name, "username", "user")
+
+    user = get_data('user_data',user_name)
+    # print(user)
     if not user:
         return {'message':"未找到该用户，请检测输入是否有误"},401
-    if check_password_hash(user.password, password) or user.password== password:
+    if verify_password(data_get_mongo('user_data','password',{"name":user_name}), password):
+        user = User(user)
         login_user(user, remember=True)
         # 将用户id保存到cookie：
         return {'message': '登录成功'}, 200

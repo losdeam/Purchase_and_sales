@@ -41,7 +41,7 @@
         <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
         <el-input v-model="inputValue" placeholder="输入内容">
         <template slot="prepend">商品id：</template></el-input>
-        <el-input v-model="str_good_num" placeholder="输入内容">
+        <el-input v-model="str_goods_num" placeholder="输入内容">
         <template slot="prepend">商品数量：</template></el-input>
         <el-button @click="self_get_good">确定</el-button>
       </div>
@@ -81,22 +81,22 @@
       width="30%"
     >
       <div>
-        <el-input v-model="str_good_name" placeholder="输入内容">
+        <el-input v-model="str_goods_name" placeholder="输入内容">
         <template slot="prepend">商品名称：</template>
         </el-input>
-        <el-input v-model="str_good_num" placeholder="输入内容">
+        <el-input v-model="str_goods_num" placeholder="输入内容">
         <template slot="prepend">商品数量：</template>
         </el-input>
-        <el-input v-model="str_good_price_buying" placeholder="输入内容">
+        <el-input v-model="str_goods_price_buying" placeholder="输入内容">
         <template slot="prepend">进货价格：</template>
         </el-input>
-        <el-input v-model="str_good_price_retail" placeholder="输入内容">
+        <el-input v-model="str_goods_price_retail" placeholder="输入内容">
         <template slot="prepend">零售价格：</template>
         </el-input>
-        <el-input v-model="str_good_sort" placeholder="输入内容">
+        <el-input v-model="str_goods_sort" placeholder="输入内容">
         <template slot="prepend">商品分类：</template>
         </el-input>
-        <el-input v-model="str_good_baseline" placeholder="输入内容">
+        <el-input v-model="str_goods_baseline" placeholder="输入内容">
         <template slot="prepend">商品基础保有量：</template>
         </el-input>
         <div>
@@ -142,32 +142,32 @@ export default {
       add_new_good : false,
       self_change_good : false ,
       transaction:{
-        good_id : 1 , 
+        goods_id : 1 , 
         change_num : 0 ,
         type : 1,
       },
-      str_good_name : '',
-      str_good_num : '',
-      str_good_price_buying : '',
-      str_good_price_retail : '',
-      str_good_sort : '',
-      str_good_baseline : '',
+      str_goods_name : '',
+      str_goods_num : '',
+      str_goods_price_buying : '',
+      str_goods_price_retail : '',
+      str_goods_sort : '',
+      str_goods_baseline : '',
       
       delete_good : {
-        good_id : 0,
+        goods_id : 0,
       },
       new_goods:{
-        good_name : '',
-        good_num : 0,
-        good_price_buying : 0,
-        good_price_retail : 0,
-        good_sort : '',
-        good_baseline : 0,
+        goods_name : '',
+        goods_num : 0,
+        goods_price_buying : 0,
+        goods_price_retail : 0,
+        goods_sort : '',
+        goods_baseline : 0,
       },
       train:{
-        good_video : null ,
+        goods_video : null ,
         bg_img : null,
-        good_id : null , 
+        goods_id : null , 
       },
       inputValue :'',
       dynamicText : ''
@@ -187,7 +187,7 @@ export default {
         console.log(file.type);
         if (allowedFileTypes.includes(file.type)) {
           this.fileTypeValid1 = true;
-          this.train.good_video = file
+          this.train.goods_video = file
 
         } else {
           this.fileTypeValid1 = false;
@@ -220,6 +220,7 @@ export default {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 添加此行，确保携带 Cookie
       })
         .then((response) =>{
           // 检查响应状态码
@@ -236,11 +237,11 @@ export default {
           const parsedArray = JSON.parse(rawData);
           this.formattedData = parsedArray.map(item => {
           return {
-            id: item.good_id,
-            name: item.good_name,
-            sort: item.good_sort,
-            baseline: item.good_baseline,
-            number: item.good_num
+            id: item.goods_id,
+            name: item.goods_name,
+            sort: item.goods_sort,
+            baseline: item.goods_baseline,
+            number: item.goods_num
           };
         });
         })
@@ -258,6 +259,7 @@ export default {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(this.transaction),
+        credentials: "include", // 添加此行，确保携带 Cookie
       })
         .then((response) => {
           // 检查响应状态码
@@ -281,9 +283,9 @@ export default {
     },
     train_new_model(){
       const formData = new FormData();
-      formData.append('good_video', this.train.good_video);
+      formData.append('goods_video', this.train.goods_video);
       formData.append('bg_img', this.train.bg_img);
-      formData.append('good_id', this.train.good_id);
+      formData.append('goods_id', this.train.goods_id);
       fetch("http://127.0.0.1:50000/api/recognition/train", {
         method: "POST",
         credentials: "include", // 添加此行，确保携带 Cookie
@@ -315,7 +317,7 @@ export default {
           console.error("Error performing transaction:", error);
         });
     },
-    add_new_good_post(){
+    add_new_goods_post(){
       fetch("http://127.0.0.1:50000/api/goods/add", {
         method: "POST",
         credentials: "include", // 添加此行，确保携带 Cookie
@@ -337,7 +339,7 @@ export default {
           }
           else{
             this.dynamicText =  '已成功将商品数据上传至数据库,请等待训练完成';
-            this.train.good_id = data["good_id"];
+            this.train.goods_id = data["goods_id"];
             this.train_new_model()
           }
           this.fetchProducts()
@@ -348,7 +350,7 @@ export default {
           console.error("Error performing transaction:", error);
         });
     },
-    delete_good_post(){
+    delete_goods_post(){
       fetch("http://127.0.0.1:50000/api/goods/delete", {
         method: "POST",
         headers: {
@@ -379,17 +381,17 @@ export default {
     add_good(row) { 
       // 打开弹窗
       this.dialogVisible = true;
-      this.transaction.good_id = row.id;
+      this.transaction.goods_id = row.id;
       this.transaction.type = 1;
     },
     ban(row){
       this.delete_confirm = true;
       this.dynamicText = "确认删除编号为"+  row.id +"的商品" + row.name +"吗，此操作不可逆"
-      this.delete_good.good_id = row.id;
+      this.delete_good.goods_id = row.id;
     },
     delete_confirm_button(){
       this.delete_confirm = false
-      this.delete_good_post()
+      this.delete_goods_post()
       
       
     },
@@ -421,20 +423,20 @@ export default {
       this.transaction.type = 1;
     },
     self_get_good(){
-      this.transaction.good_id = parseInt(this.inputValue, 10);
+      this.transaction.goods_id = parseInt(this.inputValue, 10);
       this.transaction.change_num = parseInt(this.inputValue, 10);
       this.self_change_good = false;
       this.performTransaction();
       
     },
     self_add_new_good(){
-      this.new_goods.good_name = this.str_good_name
-      this.new_goods.good_num = parseInt(this.str_good_num, 10);
-      this.new_goods.good_price_buying = parseFloat(this.str_good_price_buying)
-      this.new_goods.good_price_retail = parseFloat(this.str_good_price_retail)
-      this.new_goods.good_sort = this.str_good_sort
-      this.new_goods.good_baseline = parseInt(this.str_good_baseline, 10);
-      this.add_new_good_post()
+      this.new_goods.goods_name = this.str_goods_name
+      this.new_goods.goods_num = parseInt(this.str_goods_num, 10);
+      this.new_goods.goods_price_buying = parseFloat(this.str_goods_price_buying)
+      this.new_goods.goods_price_retail = parseFloat(this.str_goods_price_retail)
+      this.new_goods.goods_sort = this.str_goods_sort
+      this.new_goods.goods_baseline = parseInt(this.str_goods_baseline, 10);
+      this.add_new_goods_post()
       this.add_new_good = false;
     },
   },

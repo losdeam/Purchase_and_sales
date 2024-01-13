@@ -7,9 +7,9 @@
       :data="formattedData"
       v-loading="loading"
     >
-      <el-table-column prop="good_id" label="编号" ></el-table-column>
+      <el-table-column prop="goods_id" label="编号" ></el-table-column>
       <el-table-column prop="name" label="模型名称" ></el-table-column>
-      <el-table-column prop="good_num" label="操作"> </el-table-column>
+      <el-table-column prop="goods_num" label="操作"> </el-table-column>
   
     </el-table>
     </div>
@@ -35,7 +35,9 @@
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          
         },
+        credentials: "include", // 添加此行，确保携带 Cookie
       })
         .then((response) => response.json())
         .then((data) => {
@@ -45,9 +47,9 @@
           this.formattedData = parsedArray.map(item => {
           return {
             time_stamp: item.time_stamp,
-            good_id: item.good_id,
-            name : item.good_name,
-            good_num: item.good_num
+            goods_id: item.goods_id,
+            name : item.goods_name,
+            goods_num: item.goods_num
           };
   
         });

@@ -7,21 +7,25 @@ from .get_good import get_cluster_centers,get_center_img,get_goods,resize_list,f
 from .convert import  convert_annotation,convert_data
 from .lock import acquire_lock,release_lock
 from instance.yolo_config import path_config,data_config
+from function.util import get_config_data
 # xml解析包
 sets = ['train', 'test', 'val']
 classes = ['fall','candy'] # 标签值
-imgfilepath = path_config['image_path']
-
-labelfilpath = path_config['label_path']
-trainval_percent = data_config["trainval_percent"] 
-train_percent = data_config["train_percent"] 
-yaml_path = path_config["yaml_path"]
+# imgfilepath = path_config['image_path']
+# labelfilpath = path_config['label_path']
+# trainval_percent = data_config["trainval_percent"] 
+# train_percent = data_config["train_percent"] 
+# yaml_path = path_config["yaml_path"]
 
 lock_file_path = "lock_file.lock"
 def SplitDataset():
     '''
     训练、测试与验证集分割（在每一重新获取数据后都需要重新运行）
     '''
+    imgfilepath  = get_config_data('path_config','image_path')
+    trainval_percent = float(get_config_data('data_config','trainval_percent'))
+    train_percent = float(get_config_data('data_config','train_percent'))
+
     total_img = os.listdir(imgfilepath)
     num = len(total_img)
     list = range(num)
@@ -58,6 +62,7 @@ def tranform():
 　　　　２．同时对所有的图片文件进行解析和转化，将其对应的bundingbox 以及类别的信息全部解析写到label 文件中去
     　　　　　最后再通过直接读取文件，就能找到对应的label 信息
     '''
+    imgfilepath  = get_config_data('path_config','image_path')
     total_xml = os.listdir(imgfilepath)
     for file_name  in total_xml:
         image_id = file_name[:-4] 
@@ -66,6 +71,7 @@ def get_label_index(label):
     '''
     获取当前标签在yaml文件中的下标，若不存在，则加入
     '''
+    yaml_path = get_config_data('path_config','yaml_path')
     # 读取 YAML 文件
     with open(yaml_path, 'r') as file:
         data = yaml.load(file, Loader=yaml.FullLoader)

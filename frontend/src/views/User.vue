@@ -36,7 +36,7 @@
       <!-- 弹窗内容 -->
       <div>
         <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
-        <el-input v-model="new_user_data.user_name" placeholder="输入内容">
+        <el-input v-model="new_user_data.name" placeholder="输入内容">
         <template slot="prepend">用户名：</template></el-input>
         <el-input v-model="new_user_data.password" placeholder="输入内容">
         <template slot="prepend">密码：</template></el-input>
@@ -112,13 +112,13 @@
         add_new_user : false,
         dynamicText : "",
         new_user_data:{
-          user_name:""   ,
+          name:""   ,
           password:"",
           rank:1,
           power:0,
         },
         user_data : {
-          user_id :0 ,
+          user_name :"" ,
         } ,
       };
     },
@@ -149,11 +149,6 @@
         
           const rawData = JSON.stringify( data["message"]);
           const parsedArray = JSON.parse(rawData);
-          // console.log(typeof [1])
-          // console.log(typeof parsedArray);
-
-
-
           this.formattedData = parsedArray.map(item => {
           return {
             user_id: item.user_id,
@@ -239,7 +234,7 @@
             cancelButtonText: '取消',
             type: 'warning' 
           }).then(() => {
-            this.user_data.user_id = row.user_id
+            this.user_data.user_name = row.user_name
             this.delete()
           }).catch(() => {
     // 用户点击取消按钮时执行的代码，可以不做任何操作或者进行相应处理

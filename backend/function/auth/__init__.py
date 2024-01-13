@@ -1,1 +1,1 @@
-from .auth_manage import auth_show,auth_login,auth_register,delete_auth
+from .auth_manage import *

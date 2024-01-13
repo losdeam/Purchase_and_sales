@@ -8,14 +8,15 @@ import cv2
 import numpy as np
 import time 
 
-from instance.yolo_config import path_config,image_config
+from instance.yolo_config import path_config,data_config
 from flaskr.extensions import mongo
-from function.sql import get_all
+from .redis_operation import get_config_data
+# from function.sql import get_all
 
-image_flie_path = path_config["image_path"]
-label_flie_path = path_config["label_path"]
-video_flie_path = path_config["video_path"]
-goods_imgfile_path = path_config['goods_imgfile_path'] 
+# image_flie_path = path_config["image_path"]
+# label_flie_path = path_config["label_path"]
+# video_flie_path = path_config["video_path"]
+# goods_imgfile_path = path_config['goods_imgfile_path'] 
 def image_delete_local(folder_path):
     """
     删除本地数据
@@ -37,8 +38,8 @@ def image_delete_local(folder_path):
     else:
         print(f"文件夹 '{folder_path}' 不存在。")
 
-def img_clear():
-    image_delete_local(image_flie_path)
-    image_delete_local(label_flie_path)
-    image_delete_local(goods_imgfile_path)
+def img_clear(user_id = 0):
+    image_delete_local(get_config_data('path_config','image_path'))
+    image_delete_local(get_config_data('path_config','label_path'))
+    image_delete_local(get_config_data('path_config','goods_imgfile_path'))
     return "已清空图像与标签文件"

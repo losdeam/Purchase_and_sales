@@ -38,7 +38,10 @@ export default {
   created() {
     // 连接到 Socket.IO 服务器
 
-    this.socket = io('http://127.0.0.1:50000');
+    this.socket = io.connect('http://127.0.0.1:50000', {
+  withCredentials: true
+});
+
     // 监听来自服务器的视频帧消息
     this.socket.on('receive', (data) => {
       this.videoFrame = 'data:image/jpeg;base64,' + data.frame;

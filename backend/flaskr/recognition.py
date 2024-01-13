@@ -1,7 +1,8 @@
 from flask_restx import Namespace, Resource , fields   # RESTful API
-# from function.recognition import image_to_mongo,data_from_mongo,image_delete_mongo,tranform,img_clear,image_read,image_from_video，
+# from function.recognition import image_to_mongo,image_from_mongo,image_delete_mongo,tranform,img_clear,image_read,image_from_video，
 from function.recognition import  * 
-from function.goods import good_delete_f,data_get
+from function.goods import goods_delete_f,data_get,goods_delete_f
+from function.util import data_get_mongo,get_config_data
 from flaskr.extensions import socketio,redis_client
 from flask import request,jsonify
 from instance.yolo_config import path_config
@@ -11,6 +12,7 @@ import base64
 import cv2
 import time 
 import json
+
 api = Namespace('recognition', description='识别接口')
 label_model = api.model('labelmodel', {
     'label_name': fields.String(max_length=100, required=True, description='标签名称'),
@@ -28,10 +30,12 @@ class train(Resource):
         arg_name =  ('商品视频',"背景图",'商品id')
         #--------------------参数输入--------------
         try:
-            good_video = request.files['good_video']
+            goods_video = request.files['goods_video']
             bg_img = request.files['bg_img']
-            good_id = int(request.form['good_id'])
+            goods_id = int(request.form['goods_id'])
         except Exception as e: 
+            print(e)
+            goods_delete_f(goods_id)
             result = jsonify({'message': '获取背景图与商品视频时出现问题'})
             result.status_code = 401  
             return result
@@ -39,7 +43,7 @@ class train(Resource):
         #--------------------训练模块--------------
         #----------------------------------
         #--------------------空值检测--------------
-        pras = (good_video,bg_img,good_id)
+        pras = (goods_video,bg_img,goods_id)
         for index,i in enumerate(pras):
             if not i :
                 result = jsonify({'message': f'{arg_name[index]}未填写'})
@@ -47,17 +51,19 @@ class train(Resource):
                 return result 
         #----------------------------------
         #--------------------训练模块--------------
-        try:
-            data_train = train_new_label(good_id,bg_img,good_video)
-            if data_train['code'] != 200 :
-                good_delete_f(good_id)
-            result = jsonify(data_train)
-            result.status_code = data_train['code']
-            return result
-        except Exception as e :
-            result = jsonify({'message': '出现错误致使程序中断'})
-            result.status_code = 404
-            return result
+        # try:
+        data_train = train_new_label(goods_id,bg_img,goods_video)
+        if data_train['code'] != 200 :
+            goods_delete_f(goods_id)
+        result = jsonify(data_train)
+        result.status_code = data_train['code']
+        return result
+        # except Exception as e :
+        #     print(e)
+            # goods_delete_f(goods_id)
+        #     result = jsonify({'message': '出现错误致使程序中断'})
+        #     result.status_code = 404
+        #     return result
 
         #--------------------训练模块--------------
 @api.route('/get_data')
@@ -93,13 +99,14 @@ def connect():
 def disconnect ():
     global connected
     connected = False
-source = path_config['source_path']
+
 @socketio.on('sent_img') 
 def sent():
+    source = get_config_data('path_config','source_path')
     try:
-        model = YOLO(path_config['model_path'])
+        model = YOLO(get_config_data('path_config','model_path'))
     except:
-        model = YOLO(path_config['origin_model_path'])
+        model = YOLO(get_config_data('path_config','origin_model_path'))
     cap = cv2.VideoCapture(int(source))
     while cap.isOpened() and connected:
         success, frame = cap.read()
@@ -109,16 +116,14 @@ def sent():
         
         data_result = detect_goods(model,frame)
 
-        recognize_data = get_good_data(data_result)
+        recognize_data = get_goods_data(data_result)
         _, buffer = cv2.imencode('.jpg', data_result['image'])
         base64_frame = base64.b64encode(buffer).decode('utf-8')
-        # print(12314232131231,recognize_data)
         if connected:
             socketio.emit('receive',        data =  {
                 'frame' : base64_frame,
                 'message':recognize_data
             })  
-        
 
     cap.release()
 # @socketio.on('sent_message') 
