@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from function.auth import auth_login,auth_register,auth_show,delete_auth,User
 from flask_login import logout_user, login_required, current_user,UserMixin # 用户认证
-from flaskr.extensions import db, login_manager
+from flaskr.extensions import  login_manager
 from function.util import data_find_mongo,data_get_mongo
 from flask import session
 import secrets
@@ -59,6 +59,7 @@ class Login(Resource):
         args = api.payload
         # print(args)
         data = auth_login(args)
+        # print(current_user)
         return data
 @api.route('/logout')
 class Logout(Resource):

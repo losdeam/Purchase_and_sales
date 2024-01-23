@@ -1,6 +1,6 @@
 from flaskr.extensions import redis_client
-from instance.yolo_config import path_config,data_config,train_config
-from flaskr.extensions import db, login_manager
+# from instance.yolo_config import path_config,data_config,train_config
+from flaskr.extensions import  login_manager
 from flask_login import logout_user, login_required, current_user
 from .tools import load_data
 

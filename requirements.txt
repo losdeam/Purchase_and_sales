@@ -14,3 +14,5 @@ datetime
 ultralytics
 portalocker
 flask_socketio
+bcrypt
+scikit-image

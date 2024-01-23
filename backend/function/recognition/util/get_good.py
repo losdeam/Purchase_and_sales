@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from function.util import get_config_data
 from skimage.metrics import structural_similarity as ssim
-from instance.yolo_config import data_config,path_config
+# from instance.yolo_config import data_config,path_config
 import ast
 # img_part_size = data_config['img_part_size']
 # num_clusters = data_config['num_clusters']

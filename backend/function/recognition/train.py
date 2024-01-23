@@ -1,6 +1,6 @@
 import os 
 import time 
-from instance.yolo_config import path_config,data_config,model_config,data_config
+# from instance.yolo_config import path_config,data_config,model_config,data_config
 from function.util import img_clear,image_from_mongo,image_to_mongo,image_delete_local
 from .image_operation import image_from_video,image_read
 from function.util import get_config_data

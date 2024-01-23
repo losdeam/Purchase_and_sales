@@ -1,7 +1,7 @@
 
 import yaml 
-from instance.yolo_config import path_config
-yaml_path = path_config['yaml_path']
+# from instance.yolo_config import path_config
+# yaml_path = path_config['yaml_path']
 def yaml_clear(yaml_path):
     # 清空yaml中数据
     with open(yaml_path, 'r', encoding='utf-8') as file:

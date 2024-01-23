@@ -22,9 +22,9 @@ class Create(Resource):
                 "password" : hash_password("111"),
                 "rank" : 1,
                 "power" : 15,
-                "path_config" : yaml_read('./instance/path_config.yaml'),
-                "data_config" : yaml_read('./instance/data_config.yaml'),
-                "train_config" : yaml_read('./instance/train_config.yaml'),
+                # "path_config" : yaml_read('./instance/path_config.yaml'),
+                # "data_config" : yaml_read('./instance/data_config.yaml'),
+                # "train_config" : yaml_read('./instance/train_config.yaml'),
             }
             # print(data)s
             message,flag = data_to_mongo('user_data',data)

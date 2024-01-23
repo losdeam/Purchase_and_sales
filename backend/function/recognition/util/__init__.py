@@ -6,7 +6,7 @@ import subprocess
 from .get_good import get_cluster_centers,get_center_img,get_goods,resize_list,find_goods_centers
 from .convert import  convert_annotation,convert_data
 from .lock import acquire_lock,release_lock
-from instance.yolo_config import path_config,data_config
+# from instance.yolo_config import path_config,data_config
 from function.util import get_config_data
 # xml解析包
 sets = ['train', 'test', 'val']

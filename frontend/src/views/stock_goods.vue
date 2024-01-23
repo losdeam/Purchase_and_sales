@@ -290,6 +290,7 @@ export default {
         method: "POST",
         credentials: "include", // 添加此行，确保携带 Cookie
         body: formData,
+        
       })
         .then((response) => {
           // 检查响应状态码

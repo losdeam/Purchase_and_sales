@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import time 
 
-from instance.yolo_config import path_config,data_config
+# from instance.yolo_config import path_config,data_config
 from flaskr.extensions import mongo
 from .redis_operation import get_config_data
 # from function.sql import get_all

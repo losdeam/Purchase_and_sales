@@ -1,7 +1,8 @@
 from flask_restx import Namespace, Resource , fields ,reqparse  # RESTful API
-from flaskr.extensions import db ,redis_client      # 导入数据库
+from flaskr.extensions import redis_client      # 导入数据库
 from flask_login import logout_user, login_required, current_user  # 用户认证
-from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f
+from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f,read_data
+from function.goods import get_recent,read_data_recent
 from function.recognition import train_new_label
 from flask import request,jsonify
 
@@ -28,13 +29,14 @@ delete_model = api.model('deletemodel',{
 
 @api.route('/add')
 class add(Resource):
-    # @login_required  # 权限控制，必须先登录
+    @login_required  # 权限控制，必须先登录
     @api.doc(description='全新商品购入')
     @api.expect(add_model, validate=True)
     def post(self):
         '''
         全新商品购入
         '''
+        # print(current_user)
         if (current_user.power >>2) &1 :  # type: ignore
             goods_name = api.payload['goods_name']
             goods_num = api.payload['goods_num']
@@ -80,6 +82,7 @@ class show(Resource):
         '''
         显示商品列表
         '''
+        # print(current_user)
         return goods_show()
 @api.route('/record')
 class sale_record(Resource):
@@ -114,7 +117,16 @@ class update(Resource):
             new_data = api.payload['new_data']
             return  goods_conifg(goods_id ,new_data)
         return {'message': '当前用户不具有修改商品信息的权限'}, 403     
-
+@api.route('/analyze')
+class analyze(Resource):
+    @api.doc(description='数据分析')
+    def post(self):
+        '''
+        数据分析
+        '''     
+        df = read_data()
+        get_recent(df)
+        return 123
 @api.errorhandler
 def handle_validation_error(error):
     return {'message': 'Validation failed', 'error': str(error)}, 410

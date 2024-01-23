@@ -21,8 +21,8 @@ class User(UserMixin):
 # 用户加载函数
 @login_manager.user_loader
 def load_user(user_id):
-    print(123213123,user_id)
     user_data = data_from_mongo('user_data',{'id':int(user_id)})[0]
+    # print(12312131311,user_data)
     if user_data:
         return User(user_data)
     return None
@@ -75,7 +75,6 @@ def auth_conifg(user_id,new_data):
     data_result["message"] = data_update_mongo(user_id,"id","user_data",new_data)
     result = jsonify(data_result)
     return result
-
 def auth_register(data):
     '''用户注册\n
     input:\n
@@ -113,7 +112,6 @@ def auth_register(data):
     if not flag :
         return {'message': message}, 500
     return {'message': '创建成功'}, 200
-
 def check_password_secure(password):
     '''
     密码安全性判断
@@ -175,8 +173,11 @@ def auth_login(data):
         return {'message':"未找到该用户，请检测输入是否有误"},401
     if verify_password(data_get_mongo('user_data','password',{"name":user_name}), password):
         user = User(user)
+        # print(current_user)
         login_user(user, remember=True)
+        # print(current_user)
         # 将用户id保存到cookie：
+
         return {'message': '登录成功'}, 200
     else:
         return {'message': '密码错误'}, 402

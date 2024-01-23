@@ -1,5 +1,5 @@
-from ultralytics import YOLO
-from instance.yolo_config import path_config
+# from ultralytics import YOLO
+# from instance.yolo_config import path_config
 from flaskr.extensions  import redis_client
 import cv2
 import time 

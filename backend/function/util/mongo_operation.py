@@ -29,7 +29,7 @@ def data_init():
         "user_data": user_model,
         "sales_records": Sales_records_model,
     }
-
+    
     if not redis_client.exists('goods_data'):
         goods_data_list = data_from_mongo("goods_data")
         for goods_data in goods_data_list:

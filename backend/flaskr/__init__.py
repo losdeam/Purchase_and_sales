@@ -4,7 +4,7 @@ from flask_cors import CORS
 # RESTful API
 from flask_restx import Api
 # 导入需要初始化的组件
-from .extensions import db , redis_client,login_manager,mongo ,socketio
+from .extensions import redis_client,login_manager,mongo ,socketio
 from function.util import data_init ,clear_all
 import atexit
 def create_app():
@@ -22,7 +22,7 @@ def create_app():
 
     # 初始化各种组件
     login_manager.init_app(app)
-    db.init_app(app)
+    # db.init_app(app)
     redis_client.init_app(app)
     mongo.init_app(app)
     socketio.init_app(app,cors_allowed_origins="*")
@@ -35,10 +35,10 @@ def create_app():
     api.add_namespace(database.api)
     from . import auth
     api.add_namespace(auth.api)
-    from . import recognition
-    api.add_namespace(recognition.api)
-    from . import test
-    api.add_namespace(test.api)
+    # from . import recognition
+    # api.add_namespace(recognition.api)
+    # from . import test
+    # api.add_namespace(test.api)
     # 数据初始化
     data_init()
 

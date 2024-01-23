@@ -82,6 +82,9 @@ def goods_sell(goods_id,nums):
     output:\n
         msg : 信息\n
     '''
+    print(123333,goods_id)
+    if not redis_client.hget('goods_num', goods_id):
+        return  jsonify(f"商品不存在或是已经下架") 
     nums_now = int(redis_client.hget('goods_num', goods_id))
     if nums > nums_now:
         return  jsonify(f"购买数量超过库存总量:{nums_now}，购买失效") 
@@ -92,9 +95,8 @@ def goods_sell(goods_id,nums):
     
     msg.append(f"{goods_id}号商品{goods_data['name']},成功售出{nums}件物品，现库存量为{nums_now}")
     message,flag = data_to_mongo("sales_records",{'time_stamp' : str(datetime.datetime.now()),\
-                                   'records_data' : json.dumps({goods_id:nums})
+                                   'records_data' : {goods_id:nums}
     })
-    print(message,flag)
     return jsonify(msg)
 def goods_nums_verify():
     '''
@@ -161,7 +163,9 @@ def goods_delete(goods_id):
     redis_client.hdel('goods_data', goods_id)
     redis_client.hdel('goods_num', goods_id)
     # image_delete_mongo(goods_id)
-    yaml_detele('./function/recognition/data/yaml/goods0.yaml',goods_id)
+
+    # 需修改点： 加入商品标签在配置文件中的剔除
+    # yaml_detele('./function/recognition/data/yaml/goods0.yaml',goods_id)
 
     result["message"] = f"{goods_id}号商品{goods_name},已成功删除"
     return jsonify(result) 
@@ -197,7 +201,7 @@ def show_sale_record(n=3):
     data_result = {}
     data_result["message"] = []
     datas = data_from_mongo('sales_records')
-    print(datas)
+
     if datas:
         for data in datas:
             goods_data = json.loads(data['records_data'])
@@ -207,7 +211,6 @@ def show_sale_record(n=3):
                                             "goods_name": data_get(id)["name"] if redis_client.hget('goods_data', id) else "商品已下架",\
                                             "goods_num":num, \
                                             })
-
     result = jsonify(data_result)
 
     return result

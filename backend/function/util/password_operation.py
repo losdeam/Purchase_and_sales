@@ -7,6 +7,6 @@ def hash_password(plaintext_password):
     return hashed_password
 
 def verify_password(hashed_password,plaintext_password ):
-    print(plaintext_password, hashed_password)
+    # print(plaintext_password, hashed_password)
     # 验证密码是否匹配
     return bcrypt.checkpw(plaintext_password.encode('utf-8'), hashed_password)
