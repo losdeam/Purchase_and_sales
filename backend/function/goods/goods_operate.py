@@ -15,7 +15,7 @@ def data_get(goods_id):
     '''
     data = redis_client.hget('goods_data', goods_id)
     return json.loads(data)
-def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_sort,goods_baseline):
+def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline):
     '''
     添加全新商品s\n
     input:\n
@@ -23,7 +23,7 @@ def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_
         goods_num : 收入仓库的商品数量\n
         goods_price_buying : 商品的进货价\n
         goods_price_retail : 商品的零售价\n
-        goods_sort : 商品的类别\n
+        goods_category : 商品的类别\n
         goods_baseline : 商品的标准数量\n
     output:\n
         None : 直接对数据库进行操作\n
@@ -36,13 +36,14 @@ def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_
                 "num":goods_num,\
                 "price_buying":goods_price_buying,\
                 "price_retail":goods_price_retail,\
-                "sort":goods_sort,\
+                "category":goods_category,\
                 "baseline":goods_baseline}
+        print(data)
         message ,flag = data_to_mongo("goods_data",{"name":goods_name,\
                                                     "num":goods_num,\
                                                     "price_buying":goods_price_buying,\
                                                     "price_retail":goods_price_retail,\
-                                                    "sort":goods_sort,\
+                                                    "category":goods_category,\
                                                     "baseline":goods_baseline})
         if not flag :
             data_result["message"] = message
@@ -82,7 +83,6 @@ def goods_sell(goods_id,nums):
     output:\n
         msg : 信息\n
     '''
-    print(123333,goods_id)
     if not redis_client.hget('goods_num', goods_id):
         return  jsonify(f"商品不存在或是已经下架") 
     nums_now = int(redis_client.hget('goods_num', goods_id))
@@ -94,7 +94,7 @@ def goods_sell(goods_id,nums):
     msg = []
     
     msg.append(f"{goods_id}号商品{goods_data['name']},成功售出{nums}件物品，现库存量为{nums_now}")
-    message,flag = data_to_mongo("sales_records",{'time_stamp' : str(datetime.datetime.now()),\
+    message,flag = data_to_mongo("sales_records",{'time_stamp' : datetime.datetime.now(),\
                                    'records_data' : {goods_id:nums}
     })
     return jsonify(msg)
@@ -119,7 +119,7 @@ def goods_nums_verify():
             data_result["message"].append({"goods_id":int(goods_id),\
                                        "goods_name":goods_data["name"], \
                                        "goods_num":goods_num, \
-                                        "goods_sort" : goods_data["sort"] , \
+                                        "goods_category" : goods_data["category"] , \
                                         "goods_baseline" : goods_data["baseline"]\
                                        })
     return jsonify(data_result)
@@ -142,7 +142,7 @@ def goods_show():
                                        "goods_price_buying":goods_data["price_buying"], \
                                        "goods_num":goods_num, \
                                        "goods_price_retail" : goods_data["price_retail"], \
-                                        "goods_sort" :goods_data["sort"] , \
+                                        "goods_category" :goods_data["category"] , \
                                         "goods_baseline" : goods_data["baseline"]\
                                        })
     return jsonify(data_result)
@@ -182,6 +182,9 @@ def goods_delete_f(goods_id):
     result["message"] = f"{goods_id}号商品{goods_name},已成功删除"
     return jsonify(result) 
 def goods_conifg(goods_id,new_data):
+    '''
+    更改商品的基本信息
+    '''
     data_result = {}
     final_data = data_from_mongo('goods_data',{'id' :goods_id}) [0]
     for key,val in new_data.items():
@@ -206,7 +209,7 @@ def show_sale_record(n=3):
         for data in datas:
             goods_data = json.loads(data['records_data'])
             for id, num in goods_data.items():
-                data_result["message"].append({"time_stamp":data['time_stamp'],\
+                data_result["message"].append({"time_stamp":str(data['time_stamp']),\
                                             "goods_id":id, \
                                             "goods_name": data_get(id)["name"] if redis_client.hget('goods_data', id) else "商品已下架",\
                                             "goods_num":num, \

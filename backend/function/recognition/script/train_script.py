@@ -1,17 +1,30 @@
-from ultralytics import YOLO
+from ultralytics import YOLO,settings
 import sys
-sys.path.append('.')
-from instance.yolo_config import path_config,train_config
-source_model_path = path_config['source_model_path']
-origin_model_path = path_config['origin_model_path']
-yaml_path = path_config['yaml_path']
+import json 
 
+
+# Update multiple settings
+settings.update({'datasets_dir': 'function/recognition/data'})
+settings.update({'runs_dir': 'function/recognition/runs'})
+# print(settings['runs_dir'])
+# Reset settings to default values
+# settings.reset()
+
+
+source_model_path = sys.argv[1]
+# print('source_model_path',source_model_path)
+origin_model_path = sys.argv[2]
+# print('origin_model_path',origin_model_path)
+yaml_path = sys.argv[3]    
+# print('yaml_path',yaml_path)
+args_json = sys.argv[4]  
+# print('args',args_json,type(args_json))
+args = json.loads(args_json)
 def train_new_label():
     try :
         model = YOLO(source_model_path)
     except:
         model = YOLO(origin_model_path)
-    args = train_config
     # 使用“coco128.yaml”数据集训练模型3个周期
     results = model.train(data=yaml_path,**args )
 

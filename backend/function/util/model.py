@@ -9,7 +9,7 @@ goods_model = {
     "id" : int,
     "name" : str,
     "num" : int,
-    "sort" : str ,
+    "category" : str ,
     "price_buying" : float,
     "price_retail" : float,
     "baseline" : int,
@@ -29,6 +29,6 @@ user_model = {
 
 Sales_records_model= {
     "id" : int,
-    "time_stamp" : str,
+    "time_stamp" : datetime.datetime,
     "records_data" : dict,
 }

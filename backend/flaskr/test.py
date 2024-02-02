@@ -125,9 +125,9 @@ class clear(Resource):
         清空训练，从零开始
         """
         # 清空本地文件
-        image_delete_local(path_config['video_path'])
-        image_delete_local(path_config['image_path'])
-        image_delete_local(path_config['label_path'])
+        image_delete_local(path_config['video_file_path'])
+        image_delete_local(path_config['image_file_path'])
+        image_delete_local(path_config['label_file_path'])
         image_delete_local(path_config['model_file_path'])
 
         # 清空mongo中的数据

@@ -5,7 +5,7 @@ from function.goods import goods_delete_f,data_get,goods_delete_f
 from function.util import data_get_mongo,get_config_data
 from flaskr.extensions import socketio,redis_client
 from flask import request,jsonify
-from instance.yolo_config import path_config
+# from instance.yolo_config import path_config
 from ultralytics import YOLO
 import collections
 import base64
@@ -53,18 +53,19 @@ class train(Resource):
         #--------------------训练模块--------------
         # try:
         data_train = train_new_label(goods_id,bg_img,goods_video)
-        if data_train['code'] != 200 :
-            goods_delete_f(goods_id)
-        result = jsonify(data_train)
-        result.status_code = data_train['code']
-        return result
-        # except Exception as e :
-        #     print(e)
-            # goods_delete_f(goods_id)
-        #     result = jsonify({'message': '出现错误致使程序中断'})
-        #     result.status_code = 404
-        #     return result
+        try:
+            if data_train['code'] != 200 :
+                goods_delete_f(goods_id)
+                print(data_train['code'],'出现错误致使程序中断')
+            result = jsonify(data_train)
+            result.status_code = data_train['code']
 
+        except Exception as e :
+            print(e)
+            goods_delete_f(goods_id)
+            result = jsonify({'message': '出现错误致使程序中断'})
+            result.status_code = 404
+            return result
         #--------------------训练模块--------------
 @api.route('/get_data')
 class get_datas(Resource):
@@ -86,7 +87,8 @@ class strengthen(Resource):
         模型强化
         """
         return train_strengthen()
-    
+
+
 ####### 连接部分 #########
 connected = False 
 @socketio.on('connect') 
@@ -102,10 +104,12 @@ def disconnect ():
 
 @socketio.on('sent_img') 
 def sent():
+    
     source = get_config_data('path_config','source_path')
     try:
-        model = YOLO(get_config_data('path_config','model_path'))
-    except:
+        model = YOLO(get_config_data('path_config','source_model_path'))
+    except Exception as e :
+        print(e)
         model = YOLO(get_config_data('path_config','origin_model_path'))
     cap = cv2.VideoCapture(int(source))
     while cap.isOpened() and connected:

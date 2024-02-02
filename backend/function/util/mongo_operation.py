@@ -117,10 +117,9 @@ def image_to_mongo(label):
     data = {}
     data["message"] = []
     collection = mongo.db.image_data
-
-    for image_name  in range(get_config_data['target_frame_count']):
-        image_path_single =  get_config_data('path_config','image_path') +"/"+ str(image_name) + ".jpg"
-        label_path_single = get_config_data('path_config','label_path') +"/"+ str(image_name) + ".txt"
+    for image_name  in range(get_config_data('data_config','target_frame_count')):
+        image_path_single =  get_config_data('path_config','image_file_path') +"/"+ str(image_name) + ".jpg"
+        label_path_single = get_config_data('path_config','label_file_path') +"/"+ str(image_name) + ".txt"
         with open(image_path_single, 'rb') as image_file:
             encoded_image = base64.b64encode(image_file.read())
         with open(label_path_single, 'rb') as label_file:
@@ -135,8 +134,8 @@ def image_from_mongo(num_images_to_select):
     """
     collection = mongo.db.image_data
     goods_ids = redis_client.hkeys('goods_data')
-    image_flie_path = get_config_data('path_config','image_path')
-    label_flie_path = get_config_data('path_config','label_path')
+    image_flie_path = get_config_data('path_config','image_file_path')
+    label_flie_path = get_config_data('path_config','label_file_path')
     n =0 
     if os.listdir(image_flie_path):
         now_index = int(max(os.listdir(image_flie_path))[:-4]) +1 
@@ -194,10 +193,13 @@ def data_to_mongo(type_,data):
                 data["id"] =  1 
             collection.insert_one(data)
             del data["_id"]
-            user_data_json = json.dumps(data, default=json_util.default)
+            
             if type_ == "user_data":
+                del data["password"]
+                user_data_json = json.dumps(data, default=json_util.default)
                 redis_client.hset(type_,data['name'],user_data_json)
             else :
+                user_data_json = json.dumps(data, default=json_util.default)
                 redis_client.hset(type_,data['id'],user_data_json)    
             return '添加完成',flag
         except Exception as e :
@@ -259,10 +261,3 @@ def data_delete_mongo(data, key, sheet):
     # 返回删除的记录数量
     return {'deleted_count': result.deleted_count}
 
-# def model_to_mongo():
-
-# def add_goods_mongo(data):
-#     """
-
-#     """
-#     collection = mongo.db.goods

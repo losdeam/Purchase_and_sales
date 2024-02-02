@@ -70,7 +70,7 @@ def delete_auth(name):
     result["message"] = f"用户{name},已成功删除"
     return jsonify(result) 
 
-def auth_conifg(user_id,new_data):
+def auth_update(user_id,new_data):
     data_result = {}
     data_result["message"] = data_update_mongo(user_id,"id","user_data",new_data)
     result = jsonify(data_result)
@@ -181,3 +181,6 @@ def auth_login(data):
         return {'message': '登录成功'}, 200
     else:
         return {'message': '密码错误'}, 402
+def auth_get_config():
+    redis_client
+

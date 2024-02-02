@@ -198,7 +198,7 @@ def binary (bg_reisze_img,orign_resize_img,side ,site,size=(320,320),is_left = F
             cv2.waitKey(0)
 
             print(img_r.shape,similarity)
-        if similarity > 0.90 :
+        if similarity > 0.80 :
             if is_left:
                 right = mid 
             else:

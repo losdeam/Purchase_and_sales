@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource , fields ,reqparse  # RESTful API
 from flaskr.extensions import redis_client      # 导入数据库
 from flask_login import logout_user, login_required, current_user  # 用户认证
 from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f,read_data
-from function.goods import get_recent,read_data_recent
+from function.goods import get_recent,read_data_recent,test_add_data
 from function.recognition import train_new_label
 from flask import request,jsonify
 
@@ -14,7 +14,7 @@ add_model = api.model('addmodel', {
     'goods_num': fields.Integer(required=True, description='商品库存数量'),
     'goods_price_buying': fields.Float(required=True, description='商品进货价格'),
     'goods_price_retail': fields.Float(required=True, description='商品零售价格'),
-    'goods_sort': fields.String(max_length=100, required=True, description='商品分类'),
+    'goods_category': fields.String(max_length=100, required=True, description='商品分类'),
     'goods_baseline': fields.Integer(required=True, description='商品最低库存量'),
 })
 change_model = api.model('changemodel',{
@@ -42,11 +42,12 @@ class add(Resource):
             goods_num = api.payload['goods_num']
             goods_price_buying = api.payload['goods_price_buying']
             goods_price_retail = api.payload['goods_price_retail']
-            goods_sort = api.payload['goods_sort']
+            goods_category = api.payload['goods_category']
             goods_baseline = api.payload['goods_baseline']
-            data_sql = goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_sort,goods_baseline)
+            data_sql = goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline)
             result = jsonify(data_sql)
             result.status_code = data_sql['code']
+            print(data_sql)
             return result
 
         result = jsonify({'message': '当前用户不具有添加新商品的权限'})
@@ -102,7 +103,7 @@ class sale_record(Resource):
         '''
         if (current_user.power >>2) &1 :  # type: ignore
             id = api.payload['goods_id']
-            return goods_delete(id)
+            return goods_delete_f(id)
         return {'message': '当前用户不具有将商品下架的权限'}, 403     
 @api.route('/update')
 class update(Resource):
@@ -127,6 +128,16 @@ class analyze(Resource):
         df = read_data()
         get_recent(df)
         return 123
+@api.route('/test_add_data')
+class test_add_analyze(Resource):
+    def post(self):
+        '''
+        测试-添加规律的销售记录
+        '''     
+        test_add_data()
+        return 123
+
+
 @api.errorhandler
 def handle_validation_error(error):
     return {'message': 'Validation failed', 'error': str(error)}, 410

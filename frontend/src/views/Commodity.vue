@@ -12,7 +12,7 @@
       <el-table-column prop="price_retail" label="零售价"> </el-table-column>
       <el-table-column prop="number" label="库存"> </el-table-column>
       <el-table-column prop="baseline" label="基准数"> </el-table-column>
-      <el-table-column prop="sort" label="分类"> </el-table-column>
+      <el-table-column prop="category" label="分类"> </el-table-column>
       <el-table-column label="操作">
       <template slot-scope="scope">
         <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
@@ -37,7 +37,7 @@
         <el-input v-model="str_goods_price_retail" placeholder="输入内容">
         <template slot="prepend">零售价格：</template>
         </el-input>
-        <el-input v-model="str_goods_sort" placeholder="输入内容">
+        <el-input v-model="str_goods_category" placeholder="输入内容">
         <template slot="prepend">商品分类：</template>
         </el-input>
         <el-input v-model="str_goods_baseline" placeholder="输入内容">
@@ -85,7 +85,7 @@ export default {
       str_goods_num : '',
       str_goods_price_buying : '',
       str_goods_price_retail : '',
-      str_goods_sort : '',
+      str_goods_category : '',
       str_goods_baseline : '',
       transaction: {
         goods_id: 1,
@@ -99,7 +99,7 @@ export default {
           num : 0,
           price_buying : 0,
           price_retail : 0,
-          sort : '',
+          category : '',
           baseline : 0,
         },
       },
@@ -141,7 +141,7 @@ export default {
             name: item.goods_name,
             price_buying: item.goods_price_buying,
             price_retail: item.goods_price_retail,
-            sort: item.goods_sort,
+            category: item.goods_category,
             baseline: item.goods_baseline,
             number: item.goods_num
           };
@@ -191,7 +191,7 @@ export default {
       this.new_goods_data.new_data.num = parseInt(this.str_goods_num, 10);
       this.new_goods_data.new_data.price_buying = parseFloat(this.str_goods_price_buying)
       this.new_goods_data.new_data.price_retail = parseFloat(this.str_goods_price_retail)
-      this.new_goods_data.new_data.sort = this.str_goods_sort
+      this.new_goods_data.new_data.category = this.str_goods_category
       this.new_goods_data.new_data.baseline = parseInt(this.str_goods_baseline, 10);
       this.update_goods_data()
       

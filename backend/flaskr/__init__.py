@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_restx import Api
 # 导入需要初始化的组件
 from .extensions import redis_client,login_manager,mongo ,socketio
-from function.util import data_init ,clear_all
+
 import atexit
 def create_app():
     # 创造并配置app, instance_relative_config=True表示配置文件是相对于instance folder的相对路径
@@ -35,10 +35,11 @@ def create_app():
     api.add_namespace(database.api)
     from . import auth
     api.add_namespace(auth.api)
-    # from . import recognition
-    # api.add_namespace(recognition.api)
+    from . import recognition
+    api.add_namespace(recognition.api)
     # from . import test
     # api.add_namespace(test.api)
+    from function.util import data_init ,clear_all
     # 数据初始化
     data_init()
 

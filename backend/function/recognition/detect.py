@@ -24,9 +24,9 @@ def get_goods_data(detect_data):
                 goods_data_dict  = json.loads(goods_data)
                 temp_dict[goods_id] = {}
                 temp_dict[goods_id]['goods_id'] =  goods_id
-                temp_dict[goods_id]['goods_name'] =  str(goods_data_dict['goods_name'])
+                temp_dict[goods_id]['goods_name'] =  str(goods_data_dict['name'])
                 temp_dict[goods_id]['goods_count'] = 1
-                temp_dict[goods_id]['goods_price'] = float(goods_data_dict['goods_price_retail'])
+                temp_dict[goods_id]['goods_price'] = float(goods_data_dict['price_retail'])
     for goods_id in temp_dict:
         recognize_data.append(temp_dict[goods_id])
     
@@ -49,7 +49,7 @@ def detect_goods(model,img):
 
     dict_label = None 
     if img.any :
-        results = model(source=img, imgsz=320, conf=0.4,iou= 0.6)
+        results = model(source=img, imgsz=320, conf=0.5,iou= 0.5)
     # 在帧上可视化结果  
         annotated_frame = results[0].plot()
         if not dict_label:

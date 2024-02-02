@@ -5,12 +5,12 @@
 
 backend/instance/
 
-
+data
 
 backend/function/recognition/data/
 backend/function/recognition/detect/
-backend/function/recognition/model/
-backend/function/recognition/run/
+backend/function/recognition/data/model/
+backend/function/recognition/runs/
 backend/function/recognition/train_fuction/detect/
 
 node_modules

@@ -77,23 +77,24 @@ def move_ptomodel():
 def train_new_label(label,bg,video=None):
     data = {'message':[],'error':[],'code':200}
     #--------------------清空之前的训练数据并获取训练数据--------------
-    
+        
     image_delete_local(get_config_data('path_config','train_model_path'))
     message = get_data(label,bg,video)
     data["message"].append(message) 
-    print(data)
+    # print(data)
     #---------------------------------------
 
     #--------------------训练模块--------------
-    print(11123123,get_config_data('path_config','train_script_path'))
+    # print(11123123,get_config_data('path_config','train_script_path'))
     data_script = run_script(get_config_data('path_config','train_script_path'))
+    # print(111111111111112222222222,data_script)
     if 'message' in data_script:
         data["message"].append(data_script['message']) 
     if 'error' in data_script:
         data['error'].append(data_script['error']) 
         data['code'] = 403
         return  data
-    print(data)
+    # print(data)
     #---------------------------------------
         
     #--------------------数据保存--------------
@@ -124,7 +125,7 @@ def train_strengthen():
     #---------------------------------------
 
     #--------------------训练模块--------------
-    print(11123123,get_config_data('path_config','train_script_path'))
+    # print(11123123,get_config_data('path_config','train_script_path'))
     data_script = run_script(get_config_data('path_config','train_script_path'))
     if 'message' in data_script:
         data["message"].append(data_script['message']) 

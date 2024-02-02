@@ -11,9 +11,9 @@ from flaskr.extensions import mongo
 # from function.sql import get_all
 from .util import get_label_index,get_cluster_centers,get_center_img,get_goods,resize_list,convert_data,find_goods_centers
 from function.util import get_config_data
-# image_flie_path = path_config["image_path"]
-# label_flie_path = path_config["label_path"]
-# video_flie_path = path_config["video_path"]
+# image_flie_path = path_config["image_file_path"]
+# label_flie_path = path_config["label_file_path"]
+# video_flie_path = path_config["video_file_path"]
 # target_frame_count = data_config['target_frame_count'] 
 # img_size = data_config['img_size']
 # goods_imgfile_path = path_config['goods_imgfile_path'] 
@@ -29,8 +29,8 @@ def image_from_video( target_frame_count ,video=None ):
     '''
     从视频中获取图像数据，
     '''
-    video_flie_path = get_config_data('path_config','video_path')
-    output_folder = get_config_data('path_config','image_path')
+    video_flie_path = get_config_data('path_config','video_file_path')
+    output_folder = get_config_data('path_config','image_file_path')
     if  video:
         video_path = video_flie_path + '/' + '1.mp4'
         with open(video_path, 'wb') as f:
@@ -75,7 +75,7 @@ def image_read(img_list_withpath,label,bg_img,test= False):
     goods_imgfile_path = get_config_data('path_config','goods_imgfile_path')
     img_size = get_config_data('data_config','img_size')
     img_size = ast.literal_eval(img_size)
-    label_flie_path = get_config_data('path_config','label_path')
+    label_flie_path = get_config_data('path_config','label_file_path')
 
     img_size
     if not test:
