@@ -128,6 +128,7 @@ def image_to_mongo(label):
         collection.insert_one(document)
     data["message"].append("添加完毕")
     return data
+
 def image_from_mongo(num_images_to_select):
     """
     从mongo中随机提取数据   
@@ -142,10 +143,12 @@ def image_from_mongo(num_images_to_select):
     else:
         now_index = 0
     for goods_id in goods_ids:
-        pipeline = {'label' :goods_id}
+        goods_id_ = int(goods_id)
+        pipeline = {'label' :goods_id_}
         result = collection.find(pipeline)
         list_result = list(result)  
         selected_images = random.sample(list_result, min(num_images_to_select, len(list_result)))
+        # print(list_result,goods_id_,goods_ids)
         for record in selected_images:
             image_data = base64.b64decode(record['image'])
             with open(image_flie_path +"/"+str(now_index)+".jpg", 'wb') as image_file:

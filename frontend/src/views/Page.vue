@@ -27,6 +27,10 @@
               <i class="el-icon-setting"></i>
               <span slot="title">模型管理</span>
             </el-menu-item>
+            <el-menu-item index="7" @click="btn7">
+              <i class="el-icon-setting"></i>
+              <span slot="title">用户设置</span>
+            </el-menu-item>
           </el-menu>
         </el-col>
         <el-main>
@@ -67,6 +71,9 @@
       },
       btn6() {
         this.$router.push("./model_operation");
+      },
+      btn7() {
+        this.$router.push("./config");
       },
       handleOpen(key, keyPath) {
         console.log(key, keyPath);

@@ -3,7 +3,7 @@ import time
 # from instance.yolo_config import path_config,data_config,model_config,data_config
 from function.util import img_clear,image_from_mongo,image_to_mongo,image_delete_local
 from .image_operation import image_from_video,image_read
-from function.util import get_config_data
+from function.util import get_config_data,yaml_create,yaml_arrange
 from .util import SplitDataset,run_script
 
 
@@ -43,13 +43,12 @@ def arrange_model():
 
         if old_model_path[-8:] in list_model_name:
             if new_model_path[-8:] in list_model_name and old_model_path!=new_model_path :
-                    dfs(index-leak+1,leak)
-            if new_model_path == get_config_data('path_config','model_file_path') + f'/best{str(5+1)}.pt' :
-                    os.remove(old_model_path)
-                    used.add(index)
-                    return 
-            if new_model_path[-8:] in list_model_name and old_model_path!=new_model_path :
                 dfs(index-leak+1,leak)
+            if new_model_path == get_config_data('path_config','model_file_path') + f'/best{str(5+1)}.pt' :
+                os.remove(old_model_path)
+                used.add(index)
+                return 
+
             os.rename(old_model_path,new_model_path)
             used.add(index)
         else:
@@ -77,7 +76,8 @@ def move_ptomodel():
 def train_new_label(label,bg,video=None):
     data = {'message':[],'error':[],'code':200}
     #--------------------清空之前的训练数据并获取训练数据--------------
-        
+    yaml_arrange()
+    yaml_create()
     image_delete_local(get_config_data('path_config','train_model_path'))
     message = get_data(label,bg,video)
     data["message"].append(message) 
@@ -86,7 +86,7 @@ def train_new_label(label,bg,video=None):
 
     #--------------------训练模块--------------
     # print(11123123,get_config_data('path_config','train_script_path'))
-    data_script = run_script(get_config_data('path_config','train_script_path'))
+    data_script = run_script()
     # print(111111111111112222222222,data_script)
     if 'message' in data_script:
         data["message"].append(data_script['message']) 
@@ -109,6 +109,7 @@ def train_new_label(label,bg,video=None):
         data['error'].append(message)
         data['code'] = 404
         return  data
+    
     #--------------------------------------
     
     return data
@@ -126,7 +127,7 @@ def train_strengthen():
 
     #--------------------训练模块--------------
     # print(11123123,get_config_data('path_config','train_script_path'))
-    data_script = run_script(get_config_data('path_config','train_script_path'))
+    data_script = (get_config_data('path_config','train_script_path'))
     if 'message' in data_script:
         data["message"].append(data_script['message']) 
     if 'error' in data_script:

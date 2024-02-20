@@ -176,7 +176,7 @@ def goods_delete_f(goods_id):
     result = {}
     goods_name = json.loads(redis_client.hget('goods_data', goods_id))['name']
     data_delete_mongo(goods_id,"id","goods_data")
-    yaml_detele('./function/recognition/data/yaml/goods0.yaml',goods_id)
+    
     redis_client.hdel('goods_data', goods_id)
     redis_client.hdel('goods_num', goods_id)
     result["message"] = f"{goods_id}号商品{goods_name},已成功删除"

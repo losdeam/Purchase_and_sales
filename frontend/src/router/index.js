@@ -9,6 +9,7 @@ import Login from "../views/Login.vue";
 import User from "../views/User.vue";
 import recognition from "../views/recognition.vue";
 import model_operation from "../views/model_operation.vue";
+import config from "../views/config.vue";
 Vue.use(VueRouter);
  
 const routes = [
@@ -62,6 +63,11 @@ const routes = [
         path: "/page/model_operation",
         name: "model_operation",
         component: model_operation,
+      },
+      {
+        path: "/page/config",
+        name: "config",
+        component: config,
       },
     ],
   },

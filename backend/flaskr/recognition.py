@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource , fields   # RESTful API
 # from function.recognition import image_to_mongo,image_from_mongo,image_delete_mongo,tranform,img_clear,image_read,image_from_video，
 from function.recognition import  * 
 from function.goods import goods_delete_f,data_get,goods_delete_f
-from function.util import data_get_mongo,get_config_data
+from function.util import data_get_mongo,get_config_data,yaml_detele
 from flaskr.extensions import socketio,redis_client
 from flask import request,jsonify
 # from instance.yolo_config import path_config
@@ -40,7 +40,6 @@ class train(Resource):
             result.status_code = 401  
             return result
         
-        #--------------------训练模块--------------
         #----------------------------------
         #--------------------空值检测--------------
         pras = (goods_video,bg_img,goods_id)
@@ -54,6 +53,7 @@ class train(Resource):
         # try:
         data_train = train_new_label(goods_id,bg_img,goods_video)
         try:
+            
             if data_train['code'] != 200 :
                 goods_delete_f(goods_id)
                 print(data_train['code'],'出现错误致使程序中断')
@@ -63,6 +63,7 @@ class train(Resource):
         except Exception as e :
             print(e)
             goods_delete_f(goods_id)
+            yaml_detele('function/recognition/data/yaml/goods0.yaml',goods_id)
             result = jsonify({'message': '出现错误致使程序中断'})
             result.status_code = 404
             return result

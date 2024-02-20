@@ -2,13 +2,12 @@ from flask_restx import Namespace, Resource , fields   # RESTful API
 # from function.recognition import  clear_all 
 # from 
 from function.util import *
-from instance.yolo_config import path_config,data_config,data_config
 import base64
 import cv2
 import time 
 from ultralytics import YOLO
 import yaml
-
+import subprocess
 
 
 
@@ -45,15 +44,25 @@ class init(Resource):
 #-----------识别部分-----------
 @api.route('/mongo_delete')
 class mongo_delete(Resource):
-    @api.doc(description='删除')
-    @api.expect(label_model, validate=True)
     def post(self):
         """
-        删除mongo对应标签数据
         """
+        val_script_path = get_config_data('path_config','val_script_path') 
+        source_model_path = get_config_data('path_config','source_model_path')
+        subprocess.run(['python', val_script_path,source_model_path])
         name = api.payload['label_name']
         return image_delete_mongo(name)
-
+@api.route('/val_script')
+class val_script(Resource):
+    def post(self):
+        """
+        """
+        yaml_path = get_config_data('path_config','yaml_path')
+        val_script_path = get_config_data('path_config','val_script_path') 
+        source_model_path = get_config_data('path_config','source_model_path')
+        output = subprocess.run(['python', val_script_path,source_model_path,yaml_path])
+        print(type(output),output.__dir__())
+        return 
 @api.route('/local_delete')
 class local_delete(Resource):
     @api.doc(description='删除')
@@ -125,15 +134,16 @@ class clear(Resource):
         清空训练，从零开始
         """
         # 清空本地文件
-        image_delete_local(path_config['video_file_path'])
-        image_delete_local(path_config['image_file_path'])
-        image_delete_local(path_config['label_file_path'])
-        image_delete_local(path_config['model_file_path'])
 
+        image_delete_local(get_config_data('path_config','video_file_path'))
+        image_delete_local(get_config_data('path_config','image_file_path'))
+        image_delete_local(get_config_data('path_config','label_file_path'))
+        image_delete_local(get_config_data('path_config','model_file_path'))
+        image_delete_local(get_config_data('path_config','yaml_file_path'))
         # 清空mongo中的数据
         image_delete_mongo_all()
 
-        yaml_clear()    
+        yaml_clear(get_config_data('path_config','yaml_path'))    
         # 
         return "清空完毕"
 

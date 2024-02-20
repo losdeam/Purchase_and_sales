@@ -6,17 +6,10 @@ import cv2
 import numpy as np
 import time 
 import ast
-# from instance.yolo_config import path_config,data_config
 from flaskr.extensions import mongo
-# from function.sql import get_all
 from .util import get_label_index,get_cluster_centers,get_center_img,get_goods,resize_list,convert_data,find_goods_centers
 from function.util import get_config_data
-# image_flie_path = path_config["image_file_path"]
-# label_flie_path = path_config["label_file_path"]
-# video_flie_path = path_config["video_file_path"]
-# target_frame_count = data_config['target_frame_count'] 
-# img_size = data_config['img_size']
-# goods_imgfile_path = path_config['goods_imgfile_path'] 
+
 def count_time(f):
     def warrp(*a,**b):
         t1 = time.time()

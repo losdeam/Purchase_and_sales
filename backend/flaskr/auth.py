@@ -2,8 +2,8 @@ from flask_restx import Namespace, Resource, fields
 from function.auth import auth_login,auth_register,auth_show,delete_auth,User
 from flask_login import logout_user, login_required, current_user,UserMixin # 用户认证
 from flaskr.extensions import  login_manager
-from function.util import data_find_mongo,data_get_mongo
-from flask import session
+from function.util import data_find_mongo,data_get_mongo,get_config_data_all
+from flask import session,jsonify
 import secrets
 
 
@@ -106,3 +106,20 @@ class update(Resource):
         
             return  delete_auth(user_id ,new_data)
         return {'message': '当前用户不具有修改商品信息的权限'}, 403     
+@api.route('/get_config_data')
+class get_config_data(Resource):
+    @api.doc(description='')
+    @login_required  # 权限控制，必须先登录
+    def post(self):
+        '''
+        '''
+        result = {}
+        path_config = get_config_data_all('path_config')
+        data_config = get_config_data_all('data_config')
+        train_config = get_config_data_all('train_config')
+        result['path_config'] = path_config
+        result['data_config'] = data_config
+        result['train_config'] = train_config
+        json_result = jsonify(result)
+
+        return json_result

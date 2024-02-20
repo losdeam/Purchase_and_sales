@@ -33,7 +33,7 @@ def get_goods_data(detect_data):
 
     return recognize_data
 
-def detect_goods(model,img):
+def detect_goods(model,img ):
     '''
     根据输入的模型检测img中的对应物体
     input :

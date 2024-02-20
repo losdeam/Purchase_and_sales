@@ -3,6 +3,7 @@ import random
 import yaml
 import subprocess
 import json 
+from ultralytics import YOLO
 from .get_good import get_cluster_centers,get_center_img,get_goods,resize_list,find_goods_centers
 from .convert import  convert_annotation,convert_data
 from .lock import acquire_lock,release_lock
@@ -87,28 +88,28 @@ def get_label_index(label):
         return data['nc'] - 1 
 
 
-
-def run_script(script_path):
+def run_script():
+    train_script_path = get_config_data('path_config','train_script_path') 
+    val_script_path = get_config_data('path_config','val_script_path') 
     data = {}
     # 尝试获取文件锁
-    lock_fd,lock_file = acquire_lock(script_path)
+    lock_fd,lock_file = acquire_lock(train_script_path)
     if lock_fd is None:
-        data["error"] = f"文件{script_path}已经在运行中，当前版本不支持重复运行"
+        data["error"] = f"文件{train_script_path}已经在运行中，当前版本不支持重复运行"
         return data
-    
     try:
         source_model_path = get_config_data('path_config','source_model_path')
         origin_model_path = get_config_data('path_config','origin_model_path')
         yaml_path = get_config_data('path_config','yaml_path')
         args = get_config_data_all("train_config")
         args_json = json.dumps(args)
-        # print('args_json12',args_json,type(args_json))
+        
         # 脚本的主要逻辑
-        subprocess.run(['python', script_path,source_model_path,origin_model_path,yaml_path,args_json])
-        data["message"] = f"文件{script_path}开始运行"
+        subprocess.run(['python', train_script_path,source_model_path,origin_model_path,yaml_path,args_json])
+        data["message"] = f"文件{train_script_path}开始运行"
     except Exception as e :
         print(e)
-        data["error"] = f"文件{script_path}在运行中出现问题"
+        data["error"] = f"文件{train_script_path}在运行中出现问题"
     finally:
         # 释放文件锁    
         release_lock(lock_fd,lock_file)

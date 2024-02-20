@@ -1,11 +1,10 @@
 from flaskr.extensions import redis_client,mongo
-
-# from .mongo_operation import data_from_mongo
 import json
 
 
 
 def clear_all():
+    
     redis_client.flushdb()
 
 def load_data(data):

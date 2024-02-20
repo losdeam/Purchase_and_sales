@@ -6,7 +6,7 @@ def acquire_lock(script_path):
         # 尝试创建锁文件
         lock_fd = os.open(lock_file, os.O_CREAT | os.O_EXCL | os.O_RDWR)
         return lock_fd,lock_file
-    except OSError:
+    except :
         # 锁文件已存在，表示脚本已在运行
         return None
 

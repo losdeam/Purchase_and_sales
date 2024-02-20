@@ -37,8 +37,8 @@ def create_app():
     api.add_namespace(auth.api)
     from . import recognition
     api.add_namespace(recognition.api)
-    # from . import test
-    # api.add_namespace(test.api)
+    from . import test
+    api.add_namespace(test.api)
     from function.util import data_init ,clear_all
     # 数据初始化
     data_init()
