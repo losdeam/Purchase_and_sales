@@ -10,6 +10,7 @@ import User from "../views/User.vue";
 import recognition from "../views/recognition.vue";
 import model_operation from "../views/model_operation.vue";
 import config from "../views/config.vue";
+import analysis from "../views/data_analysis.vue";
 Vue.use(VueRouter);
  
 const routes = [
@@ -38,6 +39,11 @@ const routes = [
         path: "/page/commodity",
         name: "Commodity",
         component: Commodity,
+      },
+      {
+        path: "/page/analysis",
+        name: "analysis",
+        component: analysis,
       },
       {
         path: "/page/stock",

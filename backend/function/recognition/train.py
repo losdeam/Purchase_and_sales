@@ -2,11 +2,12 @@ import os
 import time 
 # from instance.yolo_config import path_config,data_config,model_config,data_config
 from function.util import img_clear,image_from_mongo,image_to_mongo,image_delete_local
-from .image_operation import image_from_video,image_read
+from .image_operation import image_from_video,image_read,get_newimg
 from function.util import get_config_data,yaml_create,yaml_arrange
 from .util import SplitDataset,run_script
-
-
+import cv2 
+import shutil
+import ast
 def count_time(f):
     def warrp(*a,**b):
         t1 = time.time()
@@ -14,7 +15,7 @@ def count_time(f):
         print(f.__name__,"耗时",time.time()-t1)
         return t
     return warrp
-def get_data(label,bg , video=None):
+def get_data(video_flie_path,output_folder,img_size,target_frame_count,label,bg ,sample_size,bg_path,label_path,video=None):
     '''
     获取训练数据（视频数据+随机小批量原有数据）
     '''
@@ -23,10 +24,13 @@ def get_data(label,bg , video=None):
     #获取当前下标
 
     #从视频中获取数据
-    img_list_withpath = image_from_video(get_config_data('data_config','target_frame_count'),video)
+    img_list_withpath = image_from_video(video_flie_path,output_folder,target_frame_count,video)
     image_read(img_list_withpath,label,bg)
+
+
+    get_newimg(output_folder,bg_path,label_path,img_size,sample_size*0.5)
     #从mongo中获取已存在标签的数据,
-    image_from_mongo(get_config_data('data_config','sample_size'))
+    image_from_mongo(sample_size)
     SplitDataset()
     return  "训练数据处理完毕"
 def arrange_model():
@@ -55,10 +59,6 @@ def arrange_model():
             leak +=1 
         dfs(index+1,leak)
     dfs(0,0)    
-# def delete_nowmodel():
-#     os.remove(old_model_path)
-#     arrange_model()
-
 def move_ptomodel():
     """
     将训练好的模型转移至模型文件夹中
@@ -75,19 +75,28 @@ def move_ptomodel():
 @count_time
 def train_new_label(label,bg,video=None):
     data = {'message':[],'error':[],'code':200}
+    #-------------------- 数据获取 --------------------------
+    train_model_path = get_config_data('path_config','train_model_path')
+    video_flie_path = get_config_data('path_config','video_file_path')
+    output_folder = get_config_data('path_config','image_file_path')
+    target_frame_count = get_config_data('data_config','target_frame_count')
+    sample_size = get_config_data('data_config','sample_size')
+    img_size = ast.literal_eval(get_config_data('data_config','img_size'))
+    bg_path = get_config_data('path_config','bg_imgfile_path')
+    label_path = get_config_data('path_config','label_file_path')
     #--------------------清空之前的训练数据并获取训练数据--------------
     yaml_arrange()
     yaml_create()
-    image_delete_local(get_config_data('path_config','train_model_path'))
-    message = get_data(label,bg,video)
+
+    image_delete_local(train_model_path)
+
+    message = get_data(video_flie_path,output_folder,img_size,target_frame_count,label,bg,sample_size,bg_path,label_path,video)
     data["message"].append(message) 
     # print(data)
     #---------------------------------------
 
     #--------------------训练模块--------------
-    # print(11123123,get_config_data('path_config','train_script_path'))
     data_script = run_script()
-    # print(111111111111112222222222,data_script)
     if 'message' in data_script:
         data["message"].append(data_script['message']) 
     if 'error' in data_script:

@@ -17,7 +17,7 @@ api = Namespace('auth', description='用户认证相关接口')
 
 
 userModel = api.model('userModel', {
-    'user_name': fields.String(max_length=100, required=True, description='用户名'),
+    'username': fields.String(max_length=100, required=True, description='用户名'),
     'password' :fields.String(max_length=100, required=True, description='密码'),
 })
 registerModel = api.model('registerModel', {
@@ -32,7 +32,7 @@ deleteModel = api.model('registerModel', {
 class Register(Resource):
     # @login_required  # 权限控制，必须先登录
     @api.doc(description='注册，\
-             输入  user_name :用户名，password :密码,rank :用户权限设置,power :用户能力设置，')
+             输入  username :用户名，password :密码,rank :用户权限设置,power :用户能力设置，')
     @api.expect(registerModel, validate=True)
     def post(self):
         '''
@@ -90,7 +90,7 @@ class delete(Resource):
         删除用户
         '''
         if (current_user.power >>3) &1 :  # type: ignore
-            name = api.payload['user_name']
+            name = api.payload['username']
             return delete_auth(name)
         return {'message': '当前用户不具有删除其他用户的权限'}, 403     
 @api.route('/update')
@@ -113,6 +113,7 @@ class get_config_data(Resource):
     def post(self):
         '''
         '''
+        print(1)
         result = {}
         path_config = get_config_data_all('path_config')
         data_config = get_config_data_all('data_config')
@@ -120,6 +121,7 @@ class get_config_data(Resource):
         result['path_config'] = path_config
         result['data_config'] = data_config
         result['train_config'] = train_config
+        print(result)
         json_result = jsonify(result)
-
+        print(result)
         return json_result

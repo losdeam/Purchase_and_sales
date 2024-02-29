@@ -72,60 +72,7 @@ class local_delete(Resource):
         删除mongo对应标签数据
         """
         return img_clear()
-# @api.route('/get_data_video')
-# class get_data_video(Resource):
-#     @api.expect(label_model, validate=True)
-#     @api.doc(description='从video文件的视频中获取图像')
-#     def post(self):
-#         """
-#         添加图像-视频
-#         """
-#         label = api.payload['label_name']
-#         bg_path = path_config['bg_imgfile_path'] 
-#         bg  = cv2.imread(bg_path)
-        
-#         img_clear()
-#         img_list_withpath = image_from_video(data_config['target_frame_count'])
-#         image_read(img_list_withpath,label,bg,test= True)
-#         return "成功从视频中添加图像数据"
-  
-@api.route('/get_data_mongo')
-class get_data_mongo(Resource):
-    @api.doc(description='从mongo中获取已使用过的图像')
-    def post(self):
-        """
-        添加图像-mongo
-        """
-        return image_from_mongo(data_config['sample_size'])
 
-@api.route('/image_operation_center')
-class image_operation_center(Resource):
-    @api.doc(description='对images中已有图像进行处理，获取其聚类中心，并添加标签')
-    def post(self):
-        """
-        图像处理-获取商品位置
-        """
-        return image_from_mongo(data_config['sample_size'])
-    
-# @api.route('/image_operation_split')
-# class image_operation_split(Resource):
-#     @api.doc(description='对images中已有图像进行处理，进行训练集以及验证集的划分')
-#     def post(self):
-#         """
-#         图像处理-图像划分
-#         """
-#         return SplitDataset()
-
-# @api.route('/train')
-# class train(Resource):
-#     @api.doc(description='一台设备仅支持同时调用一次该接口，否则可能会出现报错')
-#     @api.expect(label_model, validate=True)
-#     def post(self):
-#         """
-#         模型训练
-#         """
-#         label = api.payload['label_name']
-#         return train_new_label(label)
 @api.route('/clear')
 class clear(Resource):
     @api.doc(description='将所有的训练数据清空')
@@ -147,14 +94,6 @@ class clear(Resource):
         # 
         return "清空完毕"
 
-# @api.route('/detect_local')
-# class detect(Resource):
-#     @api.doc(description='一台设备仅支持同时调用一次该接口，否则可能会出现报错')
-#     def post(self):
-#         """
-#         进行检测并在本地调用窗口进行播放
-#         """
-#         return detect_local()
 
 #----------------------
 goods_model = api.model('goods_model', {
@@ -173,24 +112,7 @@ user_model = api.model('user_model', {
 })
 
 #----------mongo-------
-@api.route('/goods_data_add')
-class mongo_data_add(Resource):
-    @api.expect(goods_model, validate=True)
-    @api.doc(description='')
-    def post(self):
-        """
-        向mongo中添加数据
-        """
-        name = api.payload['name']
-        num = api.payload['num']
-        price_buying = api.payload['price_buying']
-        price_retail = api.payload['price_retail']
-        baseline = api.payload['baseline']
-        return data_to_mongo("goods",{"name":name,\
-                                "num" : num,
-                                "price_buying" : price_buying,
-                                "price_retail" : price_retail,
-                                "baseline" : baseline,})
+
 
 @api.route('/mongo_data_get')
 class mongo_data_get(Resource):
@@ -237,3 +159,65 @@ class yaml_read_(Resource):
         """
         path = api.payload['path']
         return yaml_read(path)
+    
+from function.goods import goods_add,goods_delete_f
+import random
+import string
+import datetime
+@api.route('/goods_data_add')
+class goods_data_add(Resource):
+    def post(self):
+        """
+        添加商品数据
+        """
+        category = ['category1','category2','category3','category4','category5']
+        for i in range(20):
+            characters = string.ascii_letters + string.digits
+            goods_name = ''.join(random.choice(characters) for _ in range(6))
+
+            goods_num = int(random.random()*50 +1) 
+            goods_price_buying = random.random() * 50
+            goods_price_retail = goods_price_buying +1 
+            goods_category = category[int(random.random() *5) ]
+            goods_baseline = goods_num +1 
+
+            data_sql = goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline)
+        # return  '添加完毕'
+@api.route('/goods_data_clear')
+class goods_data_clear(Resource):
+    def post(self):
+        """
+        清空商品数据
+        """
+        goods_id_list = redis_client.hkeys('goods_data')
+        for goods_id in goods_id_list:
+            goods_delete_f(int(goods_id))
+@api.route('/reord_data_clear')
+class reord_data_clear(Resource):
+    def post(self):
+        """
+        清空销售记录
+        """
+        data_delete_mongo(None,None ,'sales_records')
+@api.route('/goods_data_clear')
+class reord_data_clear(Resource):
+    def post(self):
+        """
+        清空商品
+        """
+        data_delete_mongo(None,None ,'goods_data')
+@api.route('/reord_data_add')
+class reord_data_add(Resource):
+    def post(self):
+        """
+        添加销售记录
+        """
+        goods_id_list = redis_client.hkeys('goods_data')
+        for goods_id in goods_id_list:
+            for day in range(7):
+                goods_id = int(goods_id)
+                nums = 50 -day*(goods_id % 3 - 1 )*3
+                message,flag = data_to_mongo("sales_records",{'time_stamp' : datetime.datetime.now()+datetime.timedelta(days=day),\
+                                            'records_data' : {goods_id:nums}
+                })
+                print(message,flag )

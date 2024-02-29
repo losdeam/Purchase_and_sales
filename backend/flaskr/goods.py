@@ -1,8 +1,7 @@
 from flask_restx import Namespace, Resource , fields ,reqparse  # RESTful API
 from flaskr.extensions import redis_client      # 导入数据库
 from flask_login import logout_user, login_required, current_user  # 用户认证
-from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f,read_data
-from function.goods import get_recent,read_data_recent,test_add_data
+from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f
 from function.recognition import train_new_label
 from flask import request,jsonify
 
@@ -47,7 +46,7 @@ class add(Resource):
             data_sql = goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline)
             result = jsonify(data_sql)
             result.status_code = data_sql['code']
-            print(data_sql)
+
             return result
 
         result = jsonify({'message': '当前用户不具有添加新商品的权限'})
@@ -118,24 +117,7 @@ class update(Resource):
             new_data = api.payload['new_data']
             return  goods_conifg(goods_id ,new_data)
         return {'message': '当前用户不具有修改商品信息的权限'}, 403     
-@api.route('/analyze')
-class analyze(Resource):
-    @api.doc(description='数据分析')
-    def post(self):
-        '''
-        数据分析
-        '''     
-        df = read_data()
-        get_recent(df)
-        return 123
-@api.route('/test_add_data')
-class test_add_analyze(Resource):
-    def post(self):
-        '''
-        测试-添加规律的销售记录
-        '''     
-        test_add_data()
-        return 123
+
 
 
 @api.errorhandler

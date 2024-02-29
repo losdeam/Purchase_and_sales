@@ -16,18 +16,22 @@
               <span slot="title">销售记录</span>
             </el-menu-item>
             <el-menu-item index="4" @click="btn4">
-              <i class="el-icon-setting"></i>
-              <span slot="title">用户管理</span>
+              <i class="el-icon-menu"></i>
+              <span slot="title">数据分析</span>
             </el-menu-item>
             <el-menu-item index="5" @click="btn5">
               <i class="el-icon-setting"></i>
-              <span slot="title">柜台识别</span>
+              <span slot="title">用户管理</span>
             </el-menu-item>
             <el-menu-item index="6" @click="btn6">
               <i class="el-icon-setting"></i>
-              <span slot="title">模型管理</span>
+              <span slot="title">柜台识别</span>
             </el-menu-item>
             <el-menu-item index="7" @click="btn7">
+              <i class="el-icon-setting"></i>
+              <span slot="title">模型管理</span>
+            </el-menu-item>
+            <el-menu-item index="8" @click="btn8">
               <i class="el-icon-setting"></i>
               <span slot="title">用户设置</span>
             </el-menu-item>
@@ -64,15 +68,18 @@
         this.$router.push("./sales_record");
       },
       btn4() {
-        this.$router.push("./User");
+        this.$router.push("./analysis");
       },
       btn5() {
-        this.$router.push("./recognition");
+        this.$router.push("./User");
       },
       btn6() {
-        this.$router.push("./model_operation");
+        this.$router.push("./recognition");
       },
       btn7() {
+        this.$router.push("./model_operation");
+      },
+      btn8() {
         this.$router.push("./config");
       },
       handleOpen(key, keyPath) {

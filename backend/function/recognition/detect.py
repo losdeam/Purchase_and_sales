@@ -49,7 +49,7 @@ def detect_goods(model,img ):
 
     dict_label = None 
     if img.any :
-        results = model(source=img, imgsz=320, conf=0.5,iou= 0.5)
+        results = model(source=img, imgsz=320, conf=0.3,iou= 0.5)
     # 在帧上可视化结果  
         annotated_frame = results[0].plot()
         if not dict_label:

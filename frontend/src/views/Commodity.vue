@@ -1,25 +1,29 @@
 <template>
   <div>
-    <el-table
-      border
-      style="width: 100%"
-      :data="formattedData"
-      element-loading-text="拼命加载中"
-    >
-      <el-table-column prop="id" label="编号" > </el-table-column>
-      <el-table-column prop="name" label="商品名称" ></el-table-column>
-      <el-table-column prop="price_buying" label="进货价"> </el-table-column>
-      <el-table-column prop="price_retail" label="零售价"> </el-table-column>
-      <el-table-column prop="number" label="库存"> </el-table-column>
-      <el-table-column prop="baseline" label="基准数"> </el-table-column>
-      <el-table-column prop="category" label="分类"> </el-table-column>
-      <el-table-column label="操作">
-      <template slot-scope="scope">
-        <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
-        <el-button @click="update_init(scope.row)">信息更新</el-button>
-      </template>      
-    </el-table-column>
-    </el-table>
+    <el-cascader :options="formattedData">
+      
+  </el-cascader>
+  <el-table
+        border
+        style="width: 100%"
+        :data="formattedData"
+        element-loading-text="拼命加载中"
+      >
+      
+        <el-table-column prop="id" label="编号"  sortable width="180"> </el-table-column>
+        <el-table-column prop="name" label="商品名称"  sortable width="180" ></el-table-column>
+        <el-table-column prop="price_buying" label="进货价" sortable width="180"> </el-table-column>
+        <el-table-column prop="price_retail" label="零售价" sortable width="180"> </el-table-column>
+        <el-table-column prop="number" label="库存" sortable width="180"> </el-table-column>
+        <el-table-column prop="baseline" label="基准数" sortable width="180"> </el-table-column>
+        <el-table-column prop="category" label="分类" sortable width="180"> </el-table-column>
+        <el-table-column label="操作">
+        <template slot-scope="scope">
+          <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
+          <el-button @click="update_init(scope.row)">信息更新</el-button>
+        </template>      
+      </el-table-column>
+      </el-table>x
     <el-dialog title="修改商品信息"
       :visible.sync="update_good"
       width="30%"

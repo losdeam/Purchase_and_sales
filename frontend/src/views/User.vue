@@ -3,7 +3,7 @@
       <el-button type="primary" @click="self_add_auth">添加新用户</el-button>
       <el-table :data="formattedData">
         <el-table-column prop="user_id" label="编号" width="180"> </el-table-column>
-        <el-table-column prop="user_name" label="用户名" width="180">
+        <el-table-column prop="username" label="用户名" width="180">
         </el-table-column>
         <el-table-column prop="user_rank" label="角色"> </el-table-column>
         <el-table-column prop="user_power" label="权限"> </el-table-column>
@@ -118,7 +118,7 @@
           power:0,
         },
         user_data : {
-          user_name :"" ,
+          username :"" ,
         } ,
       };
     },
@@ -152,7 +152,7 @@
           this.formattedData = parsedArray.map(item => {
           return {
             user_id: item.user_id,
-            user_name: item.user_name,
+            username: item.username,
             user_password: item.user_password,
             user_rank: item.user_rank,
             user_power: item.user_power,
@@ -234,7 +234,7 @@
             cancelButtonText: '取消',
             type: 'warning' 
           }).then(() => {
-            this.user_data.user_name = row.user_name
+            this.user_data.username = row.username
             this.delete()
           }).catch(() => {
     // 用户点击取消按钮时执行的代码，可以不做任何操作或者进行相应处理

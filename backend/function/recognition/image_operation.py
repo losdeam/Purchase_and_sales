@@ -9,7 +9,7 @@ import ast
 from flaskr.extensions import mongo
 from .util import get_label_index,get_cluster_centers,get_center_img,get_goods,resize_list,convert_data,find_goods_centers
 from function.util import get_config_data
-
+os.environ["OMP_NUM_THREADS"] = '1'
 def count_time(f):
     def warrp(*a,**b):
         t1 = time.time()
@@ -18,12 +18,11 @@ def count_time(f):
         return t
     return warrp
 @count_time
-def image_from_video( target_frame_count ,video=None ):
+def image_from_video( video_flie_path,output_folder,target_frame_count ,video=None ):
     '''
     从视频中获取图像数据，
     '''
-    video_flie_path = get_config_data('path_config','video_file_path')
-    output_folder = get_config_data('path_config','image_file_path')
+
     if  video:
         video_path = video_flie_path + '/' + '1.mp4'
         with open(video_path, 'wb') as f:
@@ -109,3 +108,50 @@ def image_read(img_list_withpath,label,bg_img,test= False):
         with open(label_flie_path + "/"+f"{index}" + ".txt", 'w') as label_file:
             label_file.write(str(get_label_index(label)) + " " + " ".join([str(a) for a in bb]) + '\n')
     return data
+@count_time
+def get_newimg(origin_path,background_path,label_path,size,newbkimg_len):
+    '''
+    根据所给图像，在更换背景后生成全新的图像，以进行数据增强。(严格限制图像格式为JPG,标签格式为TXT)
+    input:
+        origin_path : 原图文件夹路径
+        background_path : 背景图像位置(更换背景)
+        label_path : 标签位置
+        size : 图像调整后大小
+        newbkimg_len : 与原图中采样进行背景更换的数量
+    output:
+        无
+    '''
+    # print(size )
+    origin_path_list = os.listdir(origin_path)
+    if origin_path_list:
+        now_index = max(map(lambda x : int(x[:-4]),origin_path_list)) +1 
+    else:
+        now_index = 0
+    sample_list = random.sample(origin_path_list, int(newbkimg_len))
+    for name in sample_list:
+        img_name = name[:-4]
+        img_path = origin_path + "/" + img_name + '.jpg'
+        foreground = cv2.imread(img_path)
+        foreground = cv2.resize(foreground,size)
+        gray = cv2.cvtColor(foreground,cv2.COLOR_BGR2GRAY)
+        min_value=100
+        ret, mask = cv2.threshold(gray, min_value, 255, cv2.THRESH_BINARY + cv2.THRESH_TRIANGLE)
+        
+        # 反转蒙版
+        mask_inv = cv2.bitwise_not(mask)
+
+        for i in os.listdir(background_path):
+            label_origin_path = label_path +"/"+ img_name+'.txt'
+            label_new_path = label_path +"/"+str(now_index)+'.txt'
+            background = cv2.imread(background_path+"/"+i)
+            background = cv2.resize(background,size)
+            # 将前景和背景分别与蒙版相乘
+            foreground_masked =cv2.bitwise_and(foreground, foreground, mask=mask_inv)
+            background_masked = cv2.bitwise_and(background, background, mask=mask)
+            # 合成图像
+            result = cv2.add(foreground_masked, background_masked)
+            cv2.imwrite(origin_path+"/"+str(now_index)+'.jpg',result)
+            shutil.copy(label_origin_path,label_new_path)
+            now_index+=1 
+
+

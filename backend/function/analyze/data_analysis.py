@@ -25,9 +25,6 @@ def test_add_data():
                                         'records_data' : {goods_id:nums}
             })
             print(message,flag )
-            # print({'time_stamp' : datetime.datetime.now()+datetime.timedelta(days=day),\
-            #                             'records_data' : {goods_id:nums}
-            # })
 
 def read_data():
     '''
@@ -65,35 +62,31 @@ def get_recent(df):
     df_copy = read_data_recent(df)
 
     # 每种商品的销售总额
-    total_sales_per_product = df_copy.groupby('goods_name')['goods_reword'].sum().category_values(ascending = False )
+    total_sales_per_product = df_copy.groupby('goods_name')['goods_reword'].sum()
     # 每类商品的最高销量
     max_sales_per_category = df_copy.groupby(['goods_category', 'goods_id'])['goods_reword'].sum().groupby('goods_category').max()
-
-    # 打印结果
-    print("每种商品的销售总额:")
-    print(total_sales_per_product)
-
-    print("\n每类商品的最高销量:")
-    print(max_sales_per_category)
     
+    per_category = defaultdict(dict)
+    for category_name,category_df in df_copy.groupby(['goods_category','goods_name'])['goods_reword'].sum().groupby('goods_category'):
+        for  i,j in category_df.to_dict().items():
+            per_category[category_name][i[1]] = j
+    
+    return total_sales_per_product.to_dict(),max_sales_per_category.to_dict(),per_category
 
-    print("预测各类商品后续的销售量:")
+def get_predict(df):
+    '''
+    计时，以n天为界限进行统计。构建预测模型
+    '''
+    result  = {}
+    df_copy = read_data_recent(df)
     group_df = df_copy.groupby('goods_name')
     for name in group_df:
-        print("*" *40)
         x = np.array(list(map(lambda x: x.days,name[1]["time_stamp"] - datetime.datetime.now())) )
         y = np.array(name[1]["goods_reword"])
         model = LinearRegression()
         model.fit(x.reshape(-1, 1), y)
         # 绘制原始数据和拟合曲线
-        new_x = np.array([6, 7, 8])
+        new_x = np.array([6, 7, 8,9,10,11,12,13])
         y_pred = model.predict(new_x.reshape(-1, 1))
-        print(name[0],y_pred)
-        print("*" *40)
-    # plt.title('Nonlinear Regression Example')
-    # plt.show()
-def get_predict(df):
-    '''
-    计时，以n天为界限进行统计。构建预测模型
-    '''
-    pass
+        result[name[0]] = list(y_pred)
+    return result

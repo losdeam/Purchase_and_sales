@@ -4,7 +4,7 @@
         <h3>进销货管理系统</h3>
         <el-input
           class="input"
-          v-model="user_data.user_name"
+          v-model="user_data.username"
           style="width: 500px"
           placeholder="用户名"
         ></el-input>
@@ -31,7 +31,7 @@
     data() {
       return {
         user_data:{       
-             user_name: "",
+             username: "",
             password: '',
         },
         login_flag :false,
@@ -57,7 +57,7 @@
           }
           else{
             this.$router.push("./Page");
-            window.sessionStorage.setItem("username",this.user_data.user_name)
+            window.sessionStorage.setItem("username",this.user_data.username)
             this.login_flag = false 
             
           }

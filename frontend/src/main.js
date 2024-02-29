@@ -5,6 +5,8 @@ import store from './store'
 import router from './router'
 import './plugins/element.js'
 import axios from 'axios'
+import * as echarts from "echarts";
+Vue.prototype.$echarts = echarts
 
 Vue.config.productionTip = false
 axios.defaults.withCredentials = true

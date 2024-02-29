@@ -257,8 +257,11 @@ def data_delete_mongo(data, key, sheet):
     从sheet表中找到与key字段中与data相匹配的记录，并删除
     """
     collection = collection_data[sheet]
-    # 构建删除条件
-    query = {key: data}
+    if key and data :
+        # 构建删除条件
+        query = {key: data}
+    else :
+        query = {}
     # 删除具有特定字段值的所有记录
     result = collection.delete_many(query)
     # 返回删除的记录数量

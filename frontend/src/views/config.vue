@@ -14,8 +14,16 @@
       border
       style="width: 100%"
       :data="formattedData"
+      @row-click="handleRowClick"
     >
-      <el-table-column prop="argument" label="参数名"></el-table-column>
+      <el-table-column prop="argument" label="参数名">
+        <!-- <template slot-scope="scope">
+     
+          <el-button @click="console(scope.row.argument)"> {{scope.row.argument}}</el-button>
+        </template>   -->
+
+      </el-table-column>
+
       <el-table-column prop="value" label="值"></el-table-column>
       <el-table-column prop="detail" label="作用"></el-table-column>
     </el-table>
@@ -35,8 +43,10 @@ export default {
   },
   mounted() {
     this.fetchProducts();
+
     
   },
+
   methods: {
     setCurrentPage(page) {
       this.currentPage = page;
@@ -54,6 +64,16 @@ export default {
       }
  
     },
+    async handleRowClick() {
+      try {
+        const folderHandle = await window.showDirectoryPicker();
+        console.log('Selected folder path:', folderHandle);
+        // 在这里可以处理选择文件夹后的逻辑
+      } catch (error) {
+        console.error('Error selecting folder:', error);
+      }
+    },
+
     fetchProducts() {
       fetch("http://127.0.0.1:50000/api/auth/get_config_data", {
         method: "POST",
@@ -90,6 +110,9 @@ export default {
             value: val,
           }));
       }
+    },
+    console(row){
+      console.log(row)
     },
   },
 };

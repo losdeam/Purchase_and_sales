@@ -4,6 +4,7 @@ from flaskr.extensions import redis_client
 from function.util import hash_password,verify_password,get_data,data_get_mongo,load_data,data_verify_total,yaml_read
 from function.util import data_to_mongo ,data_from_mongo,data_update_mongo,data_delete_mongo,data_find_mongo
 from function.util import image_delete_mongo,yaml_detele
+from function.analyze import get_predict,read_data
 from flask import jsonify
 import pandas as pd 
 import datetime  
@@ -15,11 +16,11 @@ def data_get(goods_id):
     '''
     data = redis_client.hget('goods_data', goods_id)
     return json.loads(data)
-def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline):
+def goods_add(goods_name:str ,goods_num:int,goods_price_buying:float,goods_price_retail:float,goods_category:str,goods_baseline:int):
     '''
     添加全新商品s\n
     input:\n
-        goods_name :商品id\n
+        goods_name :商品名称\n
         goods_num : 收入仓库的商品数量\n
         goods_price_buying : 商品的进货价\n
         goods_price_retail : 商品的零售价\n
@@ -38,7 +39,6 @@ def goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_
                 "price_retail":goods_price_retail,\
                 "category":goods_category,\
                 "baseline":goods_baseline}
-        print(data)
         message ,flag = data_to_mongo("goods_data",{"name":goods_name,\
                                                     "num":goods_num,\
                                                     "price_buying":goods_price_buying,\
@@ -107,21 +107,25 @@ def goods_nums_verify():
     '''
     data_result = {}
     data_result["message"] = []
-    
+    df = read_data()
+    predict_dict = get_predict(df)
     goods_id_list = redis_client.hkeys('goods_data')
     for goods_id in goods_id_list:
-        
         goods_id = int(goods_id)
         goods_data = data_get(goods_id)
         goods_data["baseline"] = int(goods_data["baseline"])
         goods_num = int(redis_client.hget('goods_num', goods_id)) # 变化频率高的使用redis进行读取
-        if goods_num <= goods_data["baseline"]:
+        average_sell = sum(predict_dict[goods_data["name"]])
+        days = goods_num // average_sell
+        if goods_num <= goods_data["baseline"] or days <= 5:
             data_result["message"].append({"goods_id":int(goods_id),\
                                        "goods_name":goods_data["name"], \
                                        "goods_num":goods_num, \
+                                       'sell_days':days,\
                                         "goods_category" : goods_data["category"] , \
                                         "goods_baseline" : goods_data["baseline"]\
                                        })
+    data_result["message"].sort(key = lambda x : x['goods_id'])
     return jsonify(data_result)
 def goods_show():
     '''
@@ -145,6 +149,7 @@ def goods_show():
                                         "goods_category" :goods_data["category"] , \
                                         "goods_baseline" : goods_data["baseline"]\
                                        })
+    data_result["message"].sort(key = lambda x : x['goods_id'])
     return jsonify(data_result)
 def goods_delete(goods_id):
     '''

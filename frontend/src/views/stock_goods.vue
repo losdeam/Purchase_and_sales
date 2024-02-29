@@ -12,6 +12,7 @@
       <el-table-column prop="name" label="商品名称" width="180"></el-table-column>
       <el-table-column prop="number" label="库存"> </el-table-column>
       <el-table-column prop="baseline" label="基准数"> </el-table-column>
+      <el-table-column prop="sell_days" label="预计销售天数"> </el-table-column>
       <el-table-column prop="category" label="分类"> </el-table-column>
       <el-table-column label="操作">
       <template slot-scope="scope">
@@ -241,6 +242,7 @@ export default {
             name: item.goods_name,
             category: item.goods_category,
             baseline: item.goods_baseline,
+            sell_days : item.sell_days,
             number: item.goods_num
           };
         });

@@ -1,228 +1,155 @@
 <template>
-  <div>
-    <el-table
-      border
-      style="width: 100%"
-      :data="formattedData"
-      element-loading-text="拼命加载中"
-    >
-      <el-table-column prop="id" label="编号" > </el-table-column>
-      <el-table-column prop="name" label="商品名称" ></el-table-column>
-      <el-table-column prop="price_buying" label="进货价"> </el-table-column>
-      <el-table-column prop="price_retail" label="零售价"> </el-table-column>
-      <el-table-column prop="number" label="库存"> </el-table-column>
-      <el-table-column prop="baseline" label="基准数"> </el-table-column>
-      <el-table-column prop="category" label="分类"> </el-table-column>
-      <el-table-column label="操作">
-      <template slot-scope="scope">
-        <!-- 这里添加自定义按钮，可以根据需要修改按钮样式和功能 -->
-        <el-button @click="update_init(scope.row)">信息更新</el-button>
-      </template>      
-    </el-table-column>
-    </el-table>
-    <el-dialog title="修改商品信息"
-      :visible.sync="update_good"
-      width="30%"
-    >
       <div>
-        <el-input v-model="str_goods_name" placeholder="输入内容">
-        <template slot="prepend">商品名称：</template>
-        </el-input>
-        <el-input v-model="str_goods_num" placeholder="输入内容">
-        <template slot="prepend">商品数量：</template>
-        </el-input>
-        <el-input v-model="str_goods_price_buying" placeholder="输入内容">
-        <template slot="prepend">进货价格：</template>
-        </el-input>
-        <el-input v-model="str_goods_price_retail" placeholder="输入内容">
-        <template slot="prepend">零售价格：</template>
-        </el-input>
-        <el-input v-model="str_goods_category" placeholder="输入内容">
-        <template slot="prepend">商品分类：</template>
-        </el-input>
-        <el-input v-model="str_goods_baseline" placeholder="输入内容">
-        <template slot="prepend">商品基础保有量：</template>
-        </el-input>
-      </div>
-      <el-button @click="update_goods_button">确定</el-button>
-    </el-dialog>
-    <el-dialog title="操作成功"
-      :visible.sync="stock_success"
-      width="30%"
-    >
-      <!-- 弹窗内容 -->
-      <div>
-        <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
-        <p>{{ dynamicText }}</p>
-      </div>
-    </el-dialog>
-    <el-dialog title="操作失败"
       
-      :visible.sync="stock_fail"
-      width="30%"
-    >
-      <!-- 弹窗内容 -->
-      <div>
-        <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
-        <p>{{ dynamicText }}</p>
-      </div>
-    </el-dialog>
-  </div>
-</template>
+      <div id = "main" style="width:1200px;height:600px;"></div>
+      <div id="cate" style="width:1200px;height:600px;"></div>
 
+      <!-- <div id="category1" style="width:1200px;height:600px;"></div>
+      <div id="category2" style="width:1200px;height:600px;"></div>
+      <div id="category3" style="width:1200px;height:600px;"></div>
+      <div id="category4" style="width:1200px;height:600px;"></div>
+      <div id="category5" style="width:1200px;height:600px;"></div> -->
+
+      <el-carousel      style="width:1200px;height:600px;"    >
+        <el-carousel-item v-for="item in 5" :key="item" style="width:1200px;height:600px;" >
+
+            <!-- <p>{{item }}</p> -->
+            <div :id="'category'+ item " style="width: 1200px; height: 600px;" ></div>
+        
+          </el-carousel-item>
+      </el-carousel>
+
+    </div>
+</template>
 
 <script>
 export default {
   data() {
     return {
-      stock_fail : false,
-      stock_success :false,
-      update_good: false,
-      dynamicText: '',
-      formattedData :[],
-      products: [],
-      str_goods_name : '',
-      str_goods_num : '',
-      str_goods_price_buying : '',
-      str_goods_price_retail : '',
-      str_goods_category : '',
-      str_goods_baseline : '',
-      transaction: {
-        goods_id: 1,
-        change_num: 0,
-        type: 1, // 默认为进货
+      dict_data: {
+        salesData: {},
+        percateData: {},
       },
-      new_goods_data:{
-        goods_id: 0 ,
-        new_data:{
-          goods_name : '',
-          goods_num : 0,
-          goods_price_buying : 0,
-          goods_price_retail : 0,
-          goods_category : '',
-          goods_baseline : 0,
-        },
+      list_data:{      
+        seriesData : [],
+        percatelist : [],
       },
-      intervalId: null, 
+
+      dict_dict_category:{
+
+      },
+      dict_list_category:{
+
+      } ,
     };
   },
   mounted() {
-    // 在组件加载时获取商品数据
+    this.$nextTick(() => {
+      this.fetchProducts()
+    });
+  },
+   
     
-    this.intervalId = setInterval(this.fetchProducts, 1000);
-  },
-  beforeDestroy() {
-    // Clear the interval when the component is about to be destroyed
-    clearInterval(this.intervalId);
-  },
+
   methods: {
-    fetchProducts() {
-      // 使用后端提供的接口获取商品数据
-      fetch("http://127.0.0.1:50000/api/goods/show", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
+  fetchProducts() {
+    // 使用后端提供的接口获取商品数据
+    fetch("http://127.0.0.1:50000/api/analyze/analyze_dataget", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // 添加此行，确保携带 Cookie
+    })
+      .then((response) => response.json())
+      .then((data) => {
+      
+        const rawData = JSON.stringify( data["goods"]);
+        const parsedArray = JSON.parse(rawData);
+        this.dict_data.salesData = parsedArray
+        for (let key in this.dict_data.salesData) {
+          this.list_data.seriesData.push({name: key, value: this.dict_data.salesData[key]})
+        }
+        this.draw("各项商品的销量","main",this.list_data.seriesData,this.list_data.seriesData)
         
-          const rawData = JSON.stringify( data["message"]);
-          const parsedArray = JSON.parse(rawData);
-          // console.log(typeof [1])
-          // console.log(typeof parsedArray);
 
 
+        const rawData_ = JSON.stringify( data["best_percate"]);
+        const parsedArray_ = JSON.parse(rawData_);
+        this.dict_data.percateData = parsedArray_
+        // console.log(parsedArray_)
+        // console.log(this.dict_data.percateData)
+        for (let key in this.dict_data.percateData) {
+          this.list_data.percatelist.push({name: key, value: this.dict_data.percateData[key]})
+        }
+        // console.log(123123123,this.list_data.percatelist)
+        this.draw("各类商品的最高销量","cate",this.list_data.percatelist,this.dict_data.percateData)
 
-          this.formattedData = parsedArray.map(item => {
-          return {
-            id: item.goods_id,
-            name: item.goods_name,
-            price_buying: item.goods_price_buying,
-            price_retail: item.goods_price_retail,
-            category: item.goods_category,
-            baseline: item.goods_baseline,
-            number: item.goods_num
-          };
+        const rawData1 = JSON.stringify( data["per_category_goods"]);
+        const parsedArray1 = JSON.parse(rawData1);
+        for (let key in parsedArray1) {
+          this.dict_dict_category[key] =  parsedArray1[key]
+          // console.log(this.dict_dict_category[key])
+          this.dict_list_category[key] = []
+          for (let key1 in parsedArray1[key]){
+            this.dict_list_category[key].push({name: key1, value: parsedArray1[key][key1]})
+          }
+          // console.log(parsedArray1[key])
+          console.log(key)
+          this.draw(key,key,this.dict_list_category[key],parsedArray1[key])
 
-        });
-        })
+        }
+        // console.log(this.dict_dict_category)
+        // this.draw("各类商品的最高销量","category1",this.list_data.percatelist,this.dict_data.percateData)
+        
 
-    },
-    update_goods_data() {
-      // 使用后端提供的接口执行交易
-      fetch("http://127.0.0.1:50000/api/goods/update", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // 添加此行，确保携带 Cookie
-        body: JSON.stringify(this.new_goods_data),
       })
-      .then((response) => {
-          // 检查响应状态码
-          if (!response.ok) {
-            this.stock_fail = true;
-          }
-          else{
-            this.stock_success = true;
-          }
-          return response.json();
-        })
-        .then((data) => {
-          this.dynamicText =  data["message"];
-          this.fetchProducts()
-          // 执行交易后刷新商品数据  
-        })
-        .catch((error) => {
-          console.error("Error performing transaction:", error);
-        });
-    },
-    update_init(row){
-      this.update_good = true 
-      this.new_goods_data.goods_id = row.id
-    },
-    update_goods_button(){
-      
-      
-      this.new_goods_data.new_data.goods_name = this.str_goods_name
-      this.new_goods_data.new_data.goods_num = parseInt(this.str_goods_num, 10);
-      this.new_goods_data.new_data.goods_price_buying = parseFloat(this.str_goods_price_buying)
-      this.new_goods_data.new_data.goods_price_retail = parseFloat(this.str_goods_price_retail)
-      this.new_goods_data.new_data.goods_category = this.str_goods_category
-      this.new_goods_data.new_data.goods_baseline = parseInt(this.str_goods_baseline, 10);
-      this.update_goods_data()
-      
-      this.update_good = false 
-    }
-  },
-};
 
-</script>
-  <!-- <script>
-    
-  import { mapState } from "vuex";
-  export default {
-    name: "Commodity",
-    data() {
-      return {
-        loading: false,
-      };
-    },
-    mounted() {
-      this.loading = true;
-      clearTimeout(clear)
-      var clear = setTimeout(() => {
-         this.$axios.get("/goods").then((v) => {
-          const com = v.data;
-          this.$store.commit("record", com);
-          this.loading = false
-        })
-      }, 300);
+  },
+  draw(title_,id,data,x_data){
+    // console.log(title_,Object.values(data))
+    console.log(Object.keys(x_data))
+    console.log(Object.values(data))
+      let myChart = this.$echarts.init(document.getElementById(id));
       
-    },
-    computed: {
-      ...mapState(["table"]),
-    },
-  };
-  </script> -->
+      // 指定图表的配置项和数据
+      let option = {
+      //表头
+        title: {
+          text: title_
+        },
+        tooltip: {}, //提示
+        legend: {
+          //图例
+          data: ["销量"] //对应series每一项中的name
+        },
+        xAxis: {
+          //x轴显示内容
+          data: Object.keys(x_data)
+        },
+        yAxis: {}, //y轴默认
+        series: [ 
+          //数据1  柱形
+          {
+            name: "销量",
+            type: "bar", //类型  柱形
+            data: Object.values(data) //柱形的点
+          },
+        ]
+      }
+      myChart.setOption(option);
+
+  },
+
+},
+};
+</script>
+
+
+<style scoped>
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+}
+</style>

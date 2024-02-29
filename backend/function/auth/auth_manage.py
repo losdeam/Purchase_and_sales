@@ -33,15 +33,15 @@ def auth_show():
     '''
     data_result = {}
     data_result["message"] = []
-    user_name_list = redis_client.hkeys('user_data')
+    username_list = redis_client.hkeys('user_data')
  
-    for user_name in user_name_list:
+    for username in username_list:
 
-        user_data = get_data('user_data',user_name)
+        user_data = get_data('user_data',username)
 
         data_result["message"].append({
                 "user_id":user_data["id"],\
-                "user_name" : user_data["name"],\
+                "username" : user_data["name"],\
                 "user_rank" : user_data["rank"],\
                 "user_power" : user_data["power"],\
                                        })
@@ -51,7 +51,7 @@ def change_auth_data():
     在拥有管理员身份的前提下，对用户权限进行修改\n
         input :\n
         user_id:用户id\n
-        new_user_name :用户名\n
+        new_username :用户名\n
         new_user_password:密码\n
         rank : 二进制，以位运算的方式确认权限\n
     需进行操作：\n
@@ -79,7 +79,7 @@ def auth_register(data):
     '''用户注册\n
     input:\n
         request:前端返回的json数据\n
-        request/user_name :邮箱\n
+        request/username :邮箱\n
         request/password :密码\n
     output:\n
         data : josn文件\n
@@ -156,7 +156,7 @@ def auth_login(data):
     '''通过输入的用户信息来进行用户登录\n
     input:\n
         request:前端返回的json数据\n
-        request/user_name :邮箱\n
+        request/username :邮箱\n
         request/password :密码\n
     output:\n
         data : josn文件\n
@@ -164,14 +164,14 @@ def auth_login(data):
         data/msg : 具体信息(str)\n
         code : 状态码\n
     '''
-    user_name = data["user_name"]
+    username = data["username"]
     password = data["password"]
 
-    user = get_data('user_data',user_name)
+    user = get_data('user_data',username)
     # print(user)
     if not user:
         return {'message':"未找到该用户，请检测输入是否有误"},401
-    if verify_password(data_get_mongo('user_data','password',{"name":user_name}), password):
+    if verify_password(data_get_mongo('user_data','password',{"name":username}), password):
         user = User(user)
         # print(current_user)
         login_user(user, remember=True)
