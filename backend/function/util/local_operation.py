@@ -38,7 +38,10 @@ def image_delete_local(folder_path):
     else:
         print(f"文件夹 '{folder_path}' 不存在。")
 
-def img_clear(user_id = 0):
+def img_clear():
+    '''
+    清空之前的训练中所提取出的图像
+    '''
     image_delete_local(get_config_data('path_config','image_file_path'))
     image_delete_local(get_config_data('path_config','label_file_path'))
     image_delete_local(get_config_data('path_config','goods_imgfile_path'))

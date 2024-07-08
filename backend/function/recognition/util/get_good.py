@@ -15,7 +15,7 @@ import ast
 # num_clusters = get_config_data('data_config','num_clusters')
 
 
-# 使用 BRISK 特征检测器
+# 使用 SIFT 特征检测器
 brisk = cv2.SIFT_create()
 bf = cv2.BFMatcher()
 def get_cluster_centers(img):
@@ -136,7 +136,7 @@ def get_goods(bg_reisze_img,goods_index_list,orign_resize_img_list,cluster_cente
         left_y = binary (bg_reisze_img,orign_resize_img,(left_x,right_x) ,center_y,size=size,is_left = False , is_x = False,is_show= is_show)
         right_y = binary (bg_reisze_img,orign_resize_img,(left_x,right_x) ,center_y,size=size,is_left = True, is_x = False,is_show= is_show)
         if is_show:
-            print(index)
+            # print(index)
             cv2.imshow('test',orign_resize_img[left_y:right_y,left_x:right_x,:])
             cv2.waitKey(0)
         result.append((left_x,right_x,left_y,right_y))
@@ -190,14 +190,14 @@ def binary (bg_reisze_img,orign_resize_img,side ,site,size=(320,320),is_left = F
 
         similarity = ssim(img_r, img_bg,channel_axis =2)    
         if is_show:
-            print(mid,right,side[0],side[1],is_x,is_left)
+            # print(mid,right,side[0],side[1],is_x,is_left)
             cv2.imshow("l",t1)
             cv2.imshow("r",t2)
             cv2.imshow("img_r",img_r)
             cv2.imshow('img_bg',img_bg)
             cv2.waitKey(0)
 
-            print(img_r.shape,similarity)
+            # print(img_r.shape,similarity)
         if similarity > 0.80 :
             if is_left:
                 right = mid 

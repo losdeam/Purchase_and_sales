@@ -1,4 +1,5 @@
 <template>
+  <div>
   <el-table
     border
     style="width: 100%"
@@ -6,11 +7,12 @@
 
   >
     <el-table-column prop="time_stamp" label="时间" > </el-table-column>
-    <el-table-column prop="goods_id" label="编号" ></el-table-column>
+    <el-table-column prop="record_id" label="订单号" ></el-table-column>
     <el-table-column prop="name" label="商品名称" ></el-table-column>
     <el-table-column prop="goods_num" label="售出量"> </el-table-column>
 
   </el-table>
+</div>
 </template>
 
 <script>
@@ -48,7 +50,7 @@ methods: {
         this.formattedData = parsedArray.map(item => {
         return {
           time_stamp: item.time_stamp,
-          goods_id: item.goods_id,
+          record_id: item.record_id,
           name : item.goods_name,
           goods_num: item.goods_num
         };

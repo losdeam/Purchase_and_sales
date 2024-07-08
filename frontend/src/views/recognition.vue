@@ -3,13 +3,19 @@
 <template>
   <div>
     <img :src="videoFrame" alt="Video Frame" style="max-width: 100%; max-height: 100%;">
-
+    <el-button
+          type="primary"
+          @click="sell_recognition"
+          style="width: 400px"
+          >订单确认</el-button
+        >
     <el-table
         border
         style="width: 100%"
         :data="formattedData"
         element-loading-text="拼命加载中"
       >
+
       <el-table-column prop="id" label="编号" > </el-table-column>
       <el-table-column prop="name" label="商品名称" ></el-table-column>
       <el-table-column prop="count" label="数量"> </el-table-column>
@@ -22,7 +28,29 @@
          -->
 
       </el-table>
+      <el-dialog title="操作成功"
+      :visible.sync="stock_success"
+      width="30%"
+    >
+      <!-- 弹窗内容 -->
+      <div>
+        <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
+        <p>{{ dynamicText }}</p>
+      </div>
+    </el-dialog>
+    <el-dialog title="操作失败"
+      
+      :visible.sync="stock_fail"
+      width="30%"
+    >
+      <!-- 弹窗内容 -->
+      <div>
+        <!-- 在这里放置弹窗中的内容，可以是表单、按钮等 -->
+        <p>{{ dynamicText }}</p>
+      </div>
+    </el-dialog>
   </div>
+  
 </template>
 
 <script>
@@ -33,6 +61,9 @@ export default {
     return {
       videoFrame: null,
       formattedData :[],
+      stock_success: false,
+      stock_fail: false,
+      dynamicText : ''
     };
   },
   created() {
@@ -45,7 +76,6 @@ export default {
     // 监听来自服务器的视频帧消息
     this.socket.on('receive', (data) => {
       this.videoFrame = 'data:image/jpeg;base64,' + data.frame;
-      console.log(this.videoFrame)
       const rawData = JSON.stringify( data["message"]);
       const parsedArray = JSON.parse(rawData);
       this.formattedData = parsedArray.map(item => {
@@ -62,15 +92,40 @@ export default {
     // 发送请求视频流的消息
     this.socket.emit('sent_img');
   },
-  train(){
-    
-  },
   beforeDestroy() {
     // 断开 Socket.IO 连接
     if (this.socket) {
       this.socket.disconnect();
     }
-  }
+  },
+  methods: {
+  sell_recognition() {
+        fetch("http://127.0.0.1:50000/api/goods/sell", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // 添加此行，确保携带 Cookie
+      })
+      .then((response) => {
+          // 检查响应状态码
+          if (!response.ok) {
+            this.stock_fail = true;
+          }
+          else{
+            this.stock_success = true;
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.dynamicText = data;
+        })
+        .catch((error) => {
+
+        });
+
+      },
+    },
 };
 </script>
 

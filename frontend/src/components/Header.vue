@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <div class="header-left">
-      <div class="left">进销货管理系统</div>
+      <div class="left">智能仓库管理系统</div>
     </div>
     <div class="header-right">
       <div class="header-right__logout">

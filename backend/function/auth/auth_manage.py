@@ -107,8 +107,6 @@ def auth_register(data):
     }
 
     message,flag = data_to_mongo('user_data',data)
-
-    # print(12312321,message,flag)
     if not flag :
         return {'message': message}, 500
     return {'message': '创建成功'}, 200
@@ -152,6 +150,7 @@ def check_password_secure(password):
     elif score >= 30:
         return 200, "安全性一般的密码"
     return 403, "密码安全性过低"
+
 def auth_login(data):
     '''通过输入的用户信息来进行用户登录\n
     input:\n
@@ -166,21 +165,14 @@ def auth_login(data):
     '''
     username = data["username"]
     password = data["password"]
-
     user = get_data('user_data',username)
-    # print(user)
     if not user:
         return {'message':"未找到该用户，请检测输入是否有误"},401
     if verify_password(data_get_mongo('user_data','password',{"name":username}), password):
         user = User(user)
-        # print(current_user)
-        login_user(user, remember=True)
-        # print(current_user)
-        # 将用户id保存到cookie：
-
+        login_user(user, remember=True)        # 将用户id保存到cookie：
         return {'message': '登录成功'}, 200
     else:
         return {'message': '密码错误'}, 402
-def auth_get_config():
-    redis_client
+    
 

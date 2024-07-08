@@ -23,7 +23,7 @@
           <el-button @click="update_init(scope.row)">信息更新</el-button>
         </template>      
       </el-table-column>
-      </el-table>x
+      </el-table>
     <el-dialog title="修改商品信息"
       :visible.sync="update_good"
       width="30%"
@@ -189,8 +189,6 @@ export default {
       // console.log(this.new_goods_data.id)
     },
     update_goods_button(){
-      
-      
       this.new_goods_data.new_data.name = this.str_goods_name
       this.new_goods_data.new_data.num = parseInt(this.str_goods_num, 10);
       this.new_goods_data.new_data.price_buying = parseFloat(this.str_goods_price_buying)

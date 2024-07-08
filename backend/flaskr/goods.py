@@ -1,10 +1,10 @@
 from flask_restx import Namespace, Resource , fields ,reqparse  # RESTful API
-from flaskr.extensions import redis_client      # 导入数据库
+from flaskr.extensions import redis_client,logging,train_queue        # 导入数据库
 from flask_login import logout_user, login_required, current_user  # 用户认证
 from function.goods import goods_add,goods_sell,goods_nums_verify,goods_Replenish,goods_show,show_sale_record,goods_delete,goods_conifg,goods_delete_f
 from function.recognition import train_new_label
 from flask import request,jsonify
-
+import datetime
 # 定义请求解析器
 
 api = Namespace('goods', description='商品操作接口')
@@ -46,15 +46,20 @@ class add(Resource):
             data_sql = goods_add(goods_name ,goods_num,goods_price_buying,goods_price_retail,goods_category,goods_baseline)
             result = jsonify(data_sql)
             result.status_code = data_sql['code']
-
+            if data_sql['code'] == 200 :
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----购入了全新的商品{goods_name},正等待进行模型训练,目前还有{len(train_queue)}个训练任务待执行")
+            else:
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----购入全新商品{goods_name}失败,因为{data_sql['message']}")
             return result
 
         result = jsonify({'message': '当前用户不具有添加新商品的权限'})
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----购入全新商品{goods_name}失败,因为当前用户不具有添加新商品的权限")
         result.status_code = 406  
         return result 
    
 @api.route('/change')
 class Replenish(Resource):
+    @login_required  # 权限控制，必须先登录
     @api.doc(description='商品数量改变')
     @api.expect(change_model, validate=True)
     def post(self):
@@ -65,8 +70,24 @@ class Replenish(Resource):
         nums = api.payload['change_num']
         type= api.payload['type']
         if type :
+            logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----进货id为{id}的商品{nums}件")
             return goods_Replenish(id,nums)
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----售出id为{id}的商品{nums}件")
         return goods_sell(id,nums)
+    
+@api.route('/sell')
+class sell(Resource):
+    @login_required  # 权限控制，必须先登录
+    @api.doc(description='售出')
+    def post(self):
+        """
+        """
+
+        for id,val in redis_client.hgetall('recognize_data').items():
+            goods_sell(int(id),int(val))
+            logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----售出id为{int(id)}的商品{int(val)}件")
+
+        return '销售成功'
 @api.route('/low')
 class low(Resource):
     @api.doc(description='显示数量过低的商品')
@@ -83,6 +104,7 @@ class show(Resource):
         显示商品列表
         '''
         # print(current_user)
+        # print(logging)
         return goods_show()
 @api.route('/record')
 class sale_record(Resource):
@@ -94,6 +116,7 @@ class sale_record(Resource):
         return show_sale_record()
 @api.route('/delete')
 class sale_record(Resource):
+    @login_required  # 权限控制，必须先登录
     @api.doc(description='删除对应id商品')
     @api.expect(delete_model, validate=True)
     def post(self):
@@ -102,10 +125,18 @@ class sale_record(Resource):
         '''
         if (current_user.power >>2) &1 :  # type: ignore
             id = api.payload['goods_id']
-            return goods_delete_f(id)
+            result = goods_delete(id)
+            # print(result)
+            if result['code'] == 200 :
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----下架了id为{id}的商品")
+            else :
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----下架id为{id}的商品失败,原因为{result['message']}")
+            return jsonify(result)
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----下架id为{id}的商品失败,原因为当前用户不具有将商品下架的权限")
         return {'message': '当前用户不具有将商品下架的权限'}, 403     
 @api.route('/update')
 class update(Resource):
+    @login_required  # 权限控制，必须先登录
     @api.doc(description='商品数据更改')
     def post(self):
         '''
@@ -115,7 +146,9 @@ class update(Resource):
             
             goods_id = api.payload['id']
             new_data = api.payload['new_data']
+            logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----更改了id为{goods_id}的商品信息,更改部分为{new_data}")
             return  goods_conifg(goods_id ,new_data)
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----更改id为{id}的商品信息失败,原因为当前用户不具有修改商品信息的权限")
         return {'message': '当前用户不具有修改商品信息的权限'}, 403     
 
 

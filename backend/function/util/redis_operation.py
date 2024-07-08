@@ -14,11 +14,8 @@ def get_config_data (config_name,argument):
     获取对应config_name名称的参数键值
     '''
     if  current_user.is_authenticated:
-        
         user_data = redis_client.hget('user_data', current_user.name)
-        # print(user_data)
         argument_data = json.loads(user_data)[config_name]
-        # print(json.loads(argument_data))
         return json.loads(argument_data)[argument]
     return False 
 def get_config_data_f (config_name,argument):
@@ -52,15 +49,11 @@ def get_config_data_all_f (config_name):
     argument_data = json.loads(user_data)[config_name]
     # print(json.loads(argument_data))
     return json.loads(argument_data)
-
 def get_data(sheet, key):
     '''
     获取sheet表中的key键的值
     '''
-    # print(sheet, key)
-    # print(redis_client.hget(sheet, key))
     return load_data(redis_client.hget(sheet, key))
-
 
 
 

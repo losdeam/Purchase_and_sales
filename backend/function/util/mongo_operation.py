@@ -9,12 +9,41 @@ from bson import json_util
 import time 
 
 # from instance.yolo_config import path_config,data_config
-from flaskr.extensions import mongo,redis_client
+from flaskr.extensions import mongo,redis_client,train_queue,logging,running_process,logging
 # from function.sql import get_all
 import json
 from .model import image_model ,user_model,goods_model,Sales_records_model
 from .redis_operation import get_config_data
+import datetime
+import threading
+
+def list_check():
+    from function.recognition import train_new_label
+    from .yaml_operation import yaml_detele
+    from function.goods import goods_delete_f
+    from flask import jsonify
+    import time 
+    while True :
+        time.sleep(1)
+        while train_queue :
+            config = train_queue.pop(0)
+
+            logging[0].append(f"{datetime.datetime.now()}-----{config['label']}号商品开始训练")
+            #--------------------训练模块--------------
+            try:
+                # 根据本地文件进行训练
+                data_train = train_new_label(config)
+                if data_train['code'] != 200 :
+                    goods_delete_f(config['label'])
+                    logging[0].append(f"{datetime.datetime.now()}-----{config['label']}号商品，训练过程中出现错误致使训练中断，具体错误信息为{data_train['error']}")
+            except Exception as e :
+                logging[0].append(f"{datetime.datetime.now()}-----{config['label']}号商品，训练过程中出现错误，具体错误信息为{e}")
+                goods_delete_f(config['label'])
+            logging[0].append(f"{datetime.datetime.now()}-----{config['label']}号商品训练结束")
+        
+
 def data_init():
+    
     global collection_data
     collection_data = {
     "image" : mongo.db.image_data,
@@ -29,21 +58,29 @@ def data_init():
         "user_data": user_model,
         "sales_records": Sales_records_model,
     }
-    
+    logging[0].append(f"{datetime.datetime.now()}-----正在从数据库中加载商品数据")
     if not redis_client.exists('goods_data'):
         goods_data_list = data_from_mongo("goods_data")
         for goods_data in goods_data_list:
             goods_data_json = json.dumps(goods_data)
             redis_client.hset("goods_data",goods_data['id'],goods_data_json)
             redis_client.hset("goods_num",goods_data['id'],goods_data['num'])
+    logging[0].append(f"{datetime.datetime.now()}-----正在从数据库中加载用户数据")
     if not redis_client.exists('user_data'):
         user_data_list = data_from_mongo("user_data")
         for user_data in user_data_list:
             del user_data['password'] #不应该将密码保存至redis中，先行删去
             user_data_json = json.dumps(user_data)
             redis_client.hset("user_data",user_data['name'],user_data_json)
-            
+    logging[0].append(f"{datetime.datetime.now()}-----正在开启训练队列检测机制")
+
+    t1 = threading.Thread(target=list_check)
+    t1.daemon = True
+    t1.start()
+    running_process.append("训练队列检测机制")
+    logging[0].append(f"{datetime.datetime.now()}-----程序初始化完成")
     return None 
+
 def data_verify_type(type_,data):
     '''
     参数验证-格式验证
@@ -110,21 +147,23 @@ def image_delete_mongo_all():
     result = collection.drop()
     # 返回删除的记录数量
     return {'message': "mongo中的数据清理完毕"}
-def image_to_mongo(label):
+def image_to_mongo(config):
     """
     将训练数据保存至mongo数据库中
     """
+    # print(config)
     data = {}
     data["message"] = []
     collection = mongo.db.image_data
-    for image_name  in range(get_config_data('data_config','target_frame_count')):
-        image_path_single =  get_config_data('path_config','image_file_path') +"/"+ str(image_name) + ".jpg"
-        label_path_single = get_config_data('path_config','label_file_path') +"/"+ str(image_name) + ".txt"
+    # print(config)
+    for image_name  in range(config['target_frame_count']):
+        image_path_single =  config['image_file_path'] +"/"+ str(image_name) + ".jpg"
+        label_path_single = config['label_file_path'] +"/"+ str(image_name) + ".txt"
         with open(image_path_single, 'rb') as image_file:
             encoded_image = base64.b64encode(image_file.read())
         with open(label_path_single, 'rb') as label_file:
             content = label_file.read()
-        document = {'image':encoded_image,"label_txt":content,"label":label}
+        document = {'image':encoded_image,"label_txt":content,"label":config['label']}
         collection.insert_one(document)
     data["message"].append("添加完毕")
     return data
@@ -185,7 +224,7 @@ def data_to_mongo(type_,data):
     verify_result  = data_verify_total(type_,data)
     flag = verify_result['flag']
     message =  verify_result['message']
-    
+
     if flag:
         try:
             collection = collection_data[type_]

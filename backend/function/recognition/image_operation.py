@@ -37,9 +37,11 @@ def image_from_video( video_flie_path,output_folder,target_frame_count ,video=No
         start_index = target_frame_count *  index
         cap = cv2.VideoCapture(video_path)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        capture_interval = int(total_frames / target_frame_count)
+        # print(total_frames,target_frame_count)
+        capture_interval = max(int(total_frames / target_frame_count),1)
         # 开始截取图像
         frame_count = 0
+        # print("节点1",frame_count,capture_interval)
         while frame_count//capture_interval < target_frame_count:
             ret, frame = cap.read()
             if not ret:
@@ -68,8 +70,6 @@ def image_read(img_list_withpath,label,bg_img,test= False):
     img_size = get_config_data('data_config','img_size')
     img_size = ast.literal_eval(img_size)
     label_flie_path = get_config_data('path_config','label_file_path')
-
-    img_size
     if not test:
         bg_img = cv2.imdecode(np.fromstring(bg_img.read(), np.uint8), cv2.IMREAD_COLOR)
     data = {}
@@ -96,6 +96,10 @@ def image_read(img_list_withpath,label,bg_img,test= False):
 
     goods_index_list,goods_cluster_list = find_goods_centers(bg_reisze_img,cluster_center_img_list)
     goods_border = get_goods(bg_reisze_img,goods_index_list,orign_resize_img_list,cluster_center_list,cluster_border_list,is_show=False )
+    rate = 1/10
+    for index,border in enumerate(goods_border):
+        x,y = int((border[1]-border[0]) * rate),int((border[3] - border[2]) * rate)
+        goods_border[index] = [border[0]+x ,border[1]-x ,border[2]+y ,border[3]-y ]
 
 
 
@@ -121,7 +125,6 @@ def get_newimg(origin_path,background_path,label_path,size,newbkimg_len):
     output:
         无
     '''
-    # print(size )
     origin_path_list = os.listdir(origin_path)
     if origin_path_list:
         now_index = max(map(lambda x : int(x[:-4]),origin_path_list)) +1 

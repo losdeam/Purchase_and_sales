@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource    # RESTful API
-from flaskr.extensions import mongo,redis_client   # 导入数据库
+from flaskr.extensions import mongo,redis_client,logging     # 导入数据库
 
 from flaskr import redis_client
 from function.util import yaml_read,data_to_mongo,hash_password,data_init
@@ -26,15 +26,15 @@ class Create(Resource):
                 "data_config" : yaml_read('./instance/data_config.yaml'),
                 "train_config" : yaml_read('./instance/train_config.yaml'),
             }
-            # print(data)s
+            # print(data)
             message,flag = data_to_mongo('user_data',data)
-            print(message,flag)
+            # print(message,flag)
             if not flag :
                 return {'message': '创建失败'}, 500
             data_init()
             return {'message': '创建成功'}, 200
         except Exception as e :
-            print(e)
+            # print(e)
             return {'message': '创建失败'}, 500
 @api.route('/drop')
 class Drop(Resource):

@@ -1,7 +1,7 @@
 <template>
     <div class="home">
       <div class="homebox" v-loading="loading">
-        <h3>进销货管理系统</h3>
+        <h3>智能仓库管理系统</h3>
         <el-input
           class="input"
           v-model="user_data.username"

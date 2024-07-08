@@ -3,7 +3,7 @@ import time
 # from instance.yolo_config import path_config,data_config,model_config,data_config
 from function.util import img_clear,image_from_mongo,image_to_mongo,image_delete_local
 from .image_operation import image_from_video,image_read,get_newimg
-from function.util import get_config_data,yaml_create,yaml_arrange
+from function.util import get_config_data,yaml_create,yaml_arrange,get_config_data_all
 from .util import SplitDataset,run_script
 import cv2 
 import shutil
@@ -33,22 +33,22 @@ def get_data(video_flie_path,output_folder,img_size,target_frame_count,label,bg 
     image_from_mongo(sample_size)
     SplitDataset()
     return  "训练数据处理完毕"
-def arrange_model():
+def arrange_model(config):
     '''
     整理已有模型，维持队列的顺序
     '''
-    list_model_name = os.listdir(get_config_data('path_config','model_file_path'))
+    list_model_name = os.listdir(config['model_file_path'])
     used = set()
     def dfs(index,leak):
         if index > 5 or  index in used:
             return 
-        old_model_path = get_config_data('path_config','model_file_path') +  '/' +"best" + str(index) +".pt"
-        new_model_path = get_config_data('path_config','model_file_path') +  '/' +"best" +str(index-leak+1) +".pt"
+        old_model_path = config['model_file_path'] +  '/' +"best" + str(index) +".pt"
+        new_model_path = config['model_file_path'] +  '/' +"best" +str(index-leak+1) +".pt"
 
         if old_model_path[-8:] in list_model_name:
             if new_model_path[-8:] in list_model_name and old_model_path!=new_model_path :
                 dfs(index-leak+1,leak)
-            if new_model_path == get_config_data('path_config','model_file_path') + f'/best{str(5+1)}.pt' :
+            if new_model_path == config['model_file_path'] + f'/best{str(5+1)}.pt' :
                 os.remove(old_model_path)
                 used.add(index)
                 return 
@@ -59,21 +59,20 @@ def arrange_model():
             leak +=1 
         dfs(index+1,leak)
     dfs(0,0)    
-def move_ptomodel():
+def move_ptomodel(config):
     """
     将训练好的模型转移至模型文件夹中
     1. 保存原有模型
     2. 覆盖原有模型
     """
-    arrange_model()
-    model_path = get_config_data('path_config','train_model_path') + '/' + "train"+"/" +'weights'+'/'+'best.pt'
+    arrange_model(config)
+    model_path = config['train_model_path'] + '/' + "train"+"/" +'weights'+'/'+'best.pt'
     try:
-        os.rename(model_path,get_config_data('path_config','model_file_path') + '/best0.pt')
+        os.rename(model_path,config['model_file_path'] + '/best0.pt')
     except :
         return "模型移动失败，检测是否是训练中断或者报错",0 
     return "模型移动成功",1 
-@count_time
-def train_new_label(label,bg,video=None):
+def config_read(label,bg,video=None):
     data = {'message':[],'error':[],'code':200}
     #-------------------- 数据获取 --------------------------
     train_model_path = get_config_data('path_config','train_model_path')
@@ -87,16 +86,38 @@ def train_new_label(label,bg,video=None):
     #--------------------清空之前的训练数据并获取训练数据--------------
     yaml_arrange()
     yaml_create()
-
     image_delete_local(train_model_path)
-
     message = get_data(video_flie_path,output_folder,img_size,target_frame_count,label,bg,sample_size,bg_path,label_path,video)
     data["message"].append(message) 
-    # print(data)
+    config = {}
+    config['train_model_path']=train_model_path
+    config['train_script_path']= get_config_data('path_config','train_script_path') 
+    config['val_script_path']= get_config_data('path_config','val_script_path') 
+    config['source_model_path'] = get_config_data('path_config','source_model_path')
+    config['origin_model_path'] = get_config_data('path_config','origin_model_path')
+    config['yaml_path'] = get_config_data('path_config','yaml_path')
+    config['args'] = get_config_data_all("train_config")
+    config['label'] = label
+    config['target_frame_count'] = get_config_data('data_config','target_frame_count')
+    config['image_file_path'] = get_config_data('path_config','image_file_path')
+    config['label_file_path'] = get_config_data('path_config','label_file_path')
+    config['model_file_path'] = get_config_data('path_config','model_file_path')
+    # train_script_path = get_config_data('path_config','train_script_path') 
+    # val_script_path = get_config_data('path_config','val_script_path') 
+
+    # source_model_path = get_config_data('path_config','source_model_path')
+    # origin_model_path = get_config_data('path_config','origin_model_path')
+    # yaml_path = get_config_data('path_config','yaml_path')
+    # args = get_config_data_all("train_config")
+    return message,config
+
+def train_new_label(config):
+    data = {'message':[],'error':[],'code':200}
+    
     #---------------------------------------
 
     #--------------------训练模块--------------
-    data_script = run_script()
+    data_script = run_script(config)
     if 'message' in data_script:
         data["message"].append(data_script['message']) 
     if 'error' in data_script:
@@ -107,11 +128,11 @@ def train_new_label(label,bg,video=None):
     #---------------------------------------
         
     #--------------------数据保存--------------
-    image_to_mongo(label)
+    image_to_mongo(config)
     #--------------------------------------
 
     #--------------------将新模型保存到对应路径--------------
-    message,flag = move_ptomodel()
+    message,flag = move_ptomodel(config)
     if flag :
         data["message"].append(message)
     else:
@@ -158,9 +179,9 @@ def train_strengthen():
     return data
      
     # 
-if __name__ == "__main__":
-    print("训练开始")
+# if __name__ == "__main__":
+    # print("训练开始")
 
     # train_new_label()
     # train_new_label()
-    print("训练结束")
+    # print("训练结束")

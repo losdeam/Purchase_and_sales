@@ -61,7 +61,7 @@ class val_script(Resource):
         val_script_path = get_config_data('path_config','val_script_path') 
         source_model_path = get_config_data('path_config','source_model_path')
         output = subprocess.run(['python', val_script_path,source_model_path,yaml_path])
-        print(type(output),output.__dir__())
+        # print(type(output),output.__dir__())
         return 
 @api.route('/local_delete')
 class local_delete(Resource):
@@ -73,6 +73,14 @@ class local_delete(Resource):
         """
         return img_clear()
 
+@api.route('/redis_to_mongo')
+class redis(Resource):
+    @api.doc(description='')
+
+    def post(self):
+        """
+        """
+        return redis_to_mongo()
 @api.route('/clear')
 class clear(Resource):
     @api.doc(description='将所有的训练数据清空')
@@ -220,4 +228,4 @@ class reord_data_add(Resource):
                 message,flag = data_to_mongo("sales_records",{'time_stamp' : datetime.datetime.now()+datetime.timedelta(days=day),\
                                             'records_data' : {goods_id:nums}
                 })
-                print(message,flag )
+                # print(message,flag )

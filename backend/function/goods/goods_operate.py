@@ -54,12 +54,10 @@ def goods_add(goods_name:str ,goods_num:int,goods_price_buying:float,goods_price
         redis_client.hset("goods_num",data_id,goods_num)
         data_result["message"] = f"全新商品{goods_name},编号为{data_id},数据添加成功,现库存量{goods_num}"
         data_result["goods_id"] = data_id
-        
         return data_result
     data_id = data_get_mongo("goods_data",'id',{'name':goods_name})
     data_result["message"] = f"已存在同名商品{goods_name},编号为{data_id}，商品添加失败"
     data_result["code"] = 401
-
     return data_result
 def goods_Replenish(goods_id,nums):
     '''
@@ -107,7 +105,7 @@ def goods_nums_verify():
     '''
     data_result = {}
     data_result["message"] = []
-    df = read_data()
+    df,_ = read_data()
     predict_dict = get_predict(df)
     goods_id_list = redis_client.hkeys('goods_data')
     for goods_id in goods_id_list:
@@ -116,7 +114,10 @@ def goods_nums_verify():
         goods_data["baseline"] = int(goods_data["baseline"])
         goods_num = int(redis_client.hget('goods_num', goods_id)) # 变化频率高的使用redis进行读取
         average_sell = sum(predict_dict[goods_data["name"]])
-        days = goods_num // average_sell
+        if not average_sell:
+            days = -1 
+        else :
+            days = goods_num // average_sell
         if goods_num <= goods_data["baseline"] or days <= 5:
             data_result["message"].append({"goods_id":int(goods_id),\
                                        "goods_name":goods_data["name"], \
@@ -161,9 +162,8 @@ def goods_delete(goods_id):
     goods_name = json.loads(redis_client.hget('goods_data', goods_id))['name']
     if goods_num != 0 :
         result["message"] = f"商品{goods_name}尚有库存{goods_num}件，无法删除"
-        data = jsonify(result) 
-        data.status_code = 401
-        return data
+        result['code'] = 401
+        return result
     data_delete_mongo(goods_id,"id","goods_data")
     redis_client.hdel('goods_data', goods_id)
     redis_client.hdel('goods_num', goods_id)
@@ -173,19 +173,20 @@ def goods_delete(goods_id):
     # yaml_detele('./function/recognition/data/yaml/goods0.yaml',goods_id)
 
     result["message"] = f"{goods_id}号商品{goods_name},已成功删除"
-    return jsonify(result) 
+    result['code'] = 200
+    return result 
 def goods_delete_f(goods_id):
     '''
     删除对应的商品，强制删除
     '''
     result = {}
+    # print(213111,redis_client.hget('goods_data', goods_id))
     goods_name = json.loads(redis_client.hget('goods_data', goods_id))['name']
     data_delete_mongo(goods_id,"id","goods_data")
-    
     redis_client.hdel('goods_data', goods_id)
     redis_client.hdel('goods_num', goods_id)
     result["message"] = f"{goods_id}号商品{goods_name},已成功删除"
-    return jsonify(result) 
+    return result
 def goods_conifg(goods_id,new_data):
     '''
     更改商品的基本信息
@@ -212,13 +213,16 @@ def show_sale_record(n=3):
 
     if datas:
         for data in datas:
+            # print(data)
             goods_data = json.loads(data['records_data'])
             for id, num in goods_data.items():
                 data_result["message"].append({"time_stamp":str(data['time_stamp']),\
-                                            "goods_id":id, \
+                                            "record_id":data['id'], \
                                             "goods_name": data_get(id)["name"] if redis_client.hget('goods_data', id) else "商品已下架",\
                                             "goods_num":num, \
                                             })
+        data_result["message"].sort(key = lambda x : x['time_stamp'],reverse= True)
+        # print(data_result)
     result = jsonify(data_result)
 
     return result

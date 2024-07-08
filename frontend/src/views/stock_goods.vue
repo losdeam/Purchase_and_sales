@@ -129,6 +129,7 @@
   </template>
 
 <script>
+import data_analysisVue from './data_analysis.vue';
 export default {
   data() {
     return {
@@ -306,11 +307,10 @@ export default {
         })
         .then((data) => {
           if (this.stock_fail) {
-            this.dynamicText =  data["message"];
+            this.dynamicText =  data;
           }
           else{
-            this.dynamicText =  data["message"];
-            alert('训练完成');
+            this.dynamicText =  data;
           }
           this.fetchProducts()
 
@@ -338,7 +338,7 @@ export default {
         })
         .then((data) => {
           if (this.stock_fail) {
-            this.dynamicText =  data["error"];
+            this.dynamicText =  data['message'];
           }
           else{
             this.dynamicText =  '已成功将商品数据上传至数据库,请等待训练完成';

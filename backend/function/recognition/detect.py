@@ -27,7 +27,9 @@ def get_goods_data(detect_data):
                 temp_dict[goods_id]['goods_name'] =  str(goods_data_dict['name'])
                 temp_dict[goods_id]['goods_count'] = 1
                 temp_dict[goods_id]['goods_price'] = float(goods_data_dict['price_retail'])
+    
     for goods_id in temp_dict:
+        redis_client.hset("recognize_data",goods_id,temp_dict[goods_id]['goods_count'])
         recognize_data.append(temp_dict[goods_id])
     
 
@@ -49,7 +51,7 @@ def detect_goods(model,img ):
 
     dict_label = None 
     if img.any :
-        results = model(source=img, imgsz=320, conf=0.3,iou= 0.5)
+        results = model(source=img, imgsz=320, conf=0.25,iou= 0.1)
     # 在帧上可视化结果  
         annotated_frame = results[0].plot()
         if not dict_label:
@@ -65,6 +67,8 @@ def detect_goods(model,img ):
             data_result['site'].append((x_min,y_min,x_max,y_max))
         data_result['image'] = annotated_frame
         return data_result
+    
+
 # source = path_config['source_path']
 # def detect_local():
 

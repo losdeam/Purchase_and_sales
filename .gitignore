@@ -12,7 +12,7 @@ backend/function/recognition/detect/
 backend/function/recognition/data/model/
 backend/function/recognition/runs/
 backend/function/recognition/train_fuction/detect/
-
+backend/function/recognition/ultralytics
 node_modules
 
 

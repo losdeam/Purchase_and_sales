@@ -1,21 +1,12 @@
 from flask_restx import Namespace, Resource, fields
-from function.auth import auth_login,auth_register,auth_show,delete_auth,User
+from function.auth import auth_login,auth_register,auth_show,delete_auth,User,auth_update
 from flask_login import logout_user, login_required, current_user,UserMixin # 用户认证
-from flaskr.extensions import  login_manager
+from flaskr.extensions import  login_manager,logging  ,running_process,train_queue
 from function.util import data_find_mongo,data_get_mongo,get_config_data_all
 from flask import session,jsonify
 import secrets
-
-
-
-
-
-
-
+import datetime
 api = Namespace('auth', description='用户认证相关接口')
-
-
-
 userModel = api.model('userModel', {
     'username': fields.String(max_length=100, required=True, description='用户名'),
     'password' :fields.String(max_length=100, required=True, description='密码'),
@@ -38,12 +29,15 @@ class Register(Resource):
         '''
         注册接口
         '''
-        # print(1)
-        # print(current_user)
-        # print(current_user.__dir__())
         if (current_user.power >>3) &1 :  # type: ignore
             args = api.payload
-            return auth_register(args)
+            result ,code = auth_register(args)
+            if code == 500 :
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----注册了新用户{args['name']}_权限等级为{args['rank']}_具有权限{'{:04b}'.format(args['power'])}")
+            else:
+                logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----注册新用户,但是由于{result['message']},注册失败")
+            return result ,code
+        
         return {'message': '当前用户不具有创建新用户的权限'}, 403     
 @api.route('/login')
 class Login(Resource):
@@ -57,10 +51,10 @@ class Login(Resource):
         if current_user.is_authenticated:  # type: ignore
             logout_user()
         args = api.payload
-        # print(args)
-        data = auth_login(args)
-        # print(current_user)
-        return data
+        data,code = auth_login(args)
+        if code == 200 :
+            logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----登录了系统")
+        return (data,code)
 @api.route('/logout')
 class Logout(Resource):
     @api.doc(description='登出')
@@ -69,7 +63,9 @@ class Logout(Resource):
         '''
         登出接口
         '''
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----登出了系统")
         logout_user()
+        
         return {'message': '登出成功'}, 200
 @api.route('/show')
 class show(Resource):
@@ -89,9 +85,11 @@ class delete(Resource):
         '''
         删除用户
         '''
+        name = api.payload['username']
         if (current_user.power >>3) &1 :  # type: ignore
-            name = api.payload['username']
+            logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----删除了用户{name}")
             return delete_auth(name)
+        logging[current_user.rank].append(f"{datetime.datetime.now()}-----{current_user.name}-----删除希望删除{name},但由于权限不足而失败")
         return {'message': '当前用户不具有删除其他用户的权限'}, 403     
 @api.route('/update')
 class update(Resource):
@@ -104,7 +102,7 @@ class update(Resource):
             user_id = api.payload['user_id']
             new_data = api.payload['new_data']
         
-            return  delete_auth(user_id ,new_data)
+            return  auth_update(user_id ,new_data)
         return {'message': '当前用户不具有修改商品信息的权限'}, 403     
 @api.route('/get_config_data')
 class get_config_data(Resource):
@@ -113,7 +111,7 @@ class get_config_data(Resource):
     def post(self):
         '''
         '''
-        print(1)
+        # print(1)
         result = {}
         path_config = get_config_data_all('path_config')
         data_config = get_config_data_all('data_config')
@@ -121,7 +119,21 @@ class get_config_data(Resource):
         result['path_config'] = path_config
         result['data_config'] = data_config
         result['train_config'] = train_config
-        print(result)
+        # print(result)
         json_result = jsonify(result)
-        print(result)
+        # print(result)
         return json_result
+
+@api.route('/get_log')
+class get_log(Resource):
+    @login_required  # 权限控制，必须先登录
+    @api.doc(description='')
+    def post(self):
+        ans = []
+        for rank,message in logging.items():
+            if rank >= current_user.rank or rank == 0  :
+                ans+= message
+        ans.sort()
+        ans += ["待训练进程如下"]
+        ans += [train_queue]
+        return ans 

@@ -18,9 +18,9 @@ origin_model_path = sys.argv[2]
 yaml_path = sys.argv[3]    
 # print('yaml_path',yaml_path)
 args_json = sys.argv[4]  
-# print('args',args_json,type(args_json))
 args = json.loads(args_json)
-def train_new_label():
+
+def train_new_label( ):
     try :
         model = YOLO(source_model_path)
     except:
@@ -35,6 +35,8 @@ def train_new_label():
 
 
 if __name__ == "__main__":
-    print("训练开始")
+
+    # print('args',args_json,type(args_json))
+    # print("训练开始")
     train_new_label()
-    print("训练结束")
+    # print("训练结束")

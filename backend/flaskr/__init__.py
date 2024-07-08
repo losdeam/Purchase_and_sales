@@ -8,27 +8,25 @@ from .extensions import redis_client,login_manager,mongo ,socketio
 
 import atexit
 def create_app():
+    # ----------------------第一步，创建后端服务-----------------------
     # 创造并配置app, instance_relative_config=True表示配置文件是相对于instance folder的相对路径
     app = Flask(__name__, instance_relative_config=True)
 
     # RESTful API
     api = Api(app, version='1.0', title='purchase_sale  API',
-              description='进销货系统接口文档', prefix='/api')
-
+              description='智能仓库管理系统接口文档', prefix='/api')
     # 跨域
     CORS(app, supports_credentials=True)
     # 从 config.py 文件中读取配置
     app.config.from_pyfile('config.py')
-
     # 初始化各种组件
     login_manager.init_app(app)
     # db.init_app(app)
     redis_client.init_app(app)
     mongo.init_app(app)
     socketio.init_app(app,cors_allowed_origins="*")
-
-
-    # 导入并注册命名空间
+    # ----------------------------------------------------------------
+    # ----------------------第二步，载入各模块接口-----------------------
     from . import goods
     api.add_namespace(goods.api)
     from . import database
@@ -37,19 +35,18 @@ def create_app():
     api.add_namespace(auth.api)
     from . import recognition
     api.add_namespace(recognition.api)
-    from . import test
-    api.add_namespace(test.api)
     from . import analyze
     api.add_namespace(analyze.api)
+    from . import test
+    api.add_namespace(test.api)
+    # ----------------------------------------------------------------
+    # ----------------------第三步，数据与功能初始化-----------------------
     from function.util import data_init ,clear_all
     # 数据初始化
     data_init()
-
-    # 结束运行时清空
-    def cleanup_function():
-        # 执行清理操作
-        clear_all()
-    atexit.register(cleanup_function)
+    # ----------------------------------------------------------------
+    # ----------------------第四步，程序退出注册-----------------------
+    atexit.register(clear_all)
     return app
-
+    # ----------------------------------------------------------------
 

@@ -29,7 +29,7 @@
             </el-menu-item>
             <el-menu-item index="7" @click="btn7">
               <i class="el-icon-setting"></i>
-              <span slot="title">模型管理</span>
+              <span slot="title">操作日志</span>
             </el-menu-item>
             <el-menu-item index="8" @click="btn8">
               <i class="el-icon-setting"></i>
